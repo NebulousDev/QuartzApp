@@ -1,0 +1,10 @@
+{
+  "registries": [
+    {
+      "kind": "git",
+      "repository": "https://github.com/NebulousDev/QuartzVcpkg",
+      "baseline": "52522307390d3e6b5827e26e1646b82777bbc339",
+      "packages": [ "quartzlib" ]
+    }
+  ]
+} 
