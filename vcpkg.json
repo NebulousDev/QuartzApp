@@ -2,7 +2,10 @@
   "name": "quartz-app",
   "version": "1.0.0",
   "dependencies": [
+    "quartzlib",
     "glfw3",
-    "quartzlib"
+    "glew",
+    "vulkan",
+    "directx-headers"
   ]
 }
