@@ -1,41 +1,27 @@
 #include "GLFWWindow.h"
 
 #include "GLFWHelper.h"
-#include "Application.h"
+#include "GLFWApplication.h"
 #include <GLFW/glfw3.h>
 
 #include <cassert>
 
 namespace Quartz
 {
-	GLFWWindow::GLFWWindow(const WindowInfo& info, Application* pParentApp)
-		: Window(info, pParentApp), 
-		mpGLFWwindow(nullptr) { }
+	GLFWWindow::GLFWWindow(Application* pParentApp, GLFWwindow* pGLFWwindow, const String& title, Surface* pSurface) :
+		Window(pParentApp, pSurface),
+		mpGLFWwindow(pGLFWwindow),
+		mTitle(title) { }
 
-	bool GLFWWindow::Create()
+	bool GLFWWindow::RequestClose()
 	{
-		mpGLFWwindow = glfwCreateWindow(mWidth, mHeight, (const char*)mTitle.Str(), NULL, NULL);
-
-		if (!mpGLFWwindow)
-		{
-			GLFWHelper::PrintError();
-			return false;
-		}
-
-		glfwSetWindowUserPointer(mpGLFWwindow, (void*)this);
-
-		GLFWHelper::RegisterAppWindow(reinterpret_cast<GLFWApplication*>(mpParent), this);
-
-		return true;
+		GLFWApplication* pGLFWApp = static_cast<GLFWApplication*>(mpParent);
+		return GLFWHelper::CallWindowCloseRequestedCallback(pGLFWApp, this);
 	}
 
-	void GLFWWindow::Destroy()
+	void GLFWWindow::Close()
 	{
-		if (mpGLFWwindow)
-		{
-			glfwDestroyWindow(mpGLFWwindow);
-			GLFWHelper::UnregisterAppWindow(reinterpret_cast<GLFWApplication*>(mpParent), this);
-		}
+		mpParent->CloseWindow(this);
 	}
 
 	bool GLFWWindow::SetTitle(const String& title)
@@ -43,7 +29,7 @@ namespace Quartz
 		glfwSetWindowTitle(mpGLFWwindow, title.Str());
 
 		// There is no way to retrieve the window title from GLFW,
-		// so we have to trust that glfwSetWindowTitle worked.
+		// so we have to store it here.
 		mTitle = title;
 
 		return true;
@@ -55,18 +41,7 @@ namespace Quartz
 
 		glfwSetWindowSize(mpGLFWwindow, width, height);
 
-		// Note, returned width and hight may be zero if an error occured
-		int newWidth, newHeight;
-		glfwGetWindowSize(mpGLFWwindow, &newWidth, &newHeight);
-
-		if (newWidth == 0 || newHeight == 0)
-		{
-			return false;
-		}
-
-		mWidth = newWidth;
-		mHeight = newHeight;
-
+		// GLFW has no way to check the success of glfwSetWindowSize
 		return true;
 	}
 
@@ -79,13 +54,7 @@ namespace Quartz
 	{
 		glfwSetWindowPos(mpGLFWwindow, posX, posY);
 
-		// Note, returned x and y may be zero if an error occured
-		int newX, newY;
-		glfwGetWindowPos(mpGLFWwindow, &newX, &newY);
-
-		mWidth = newX;
-		mHeight = newY;
-
+		// GLFW has no way to check the success of glfwSetWindowPos
 		return true; 
 	}
 
@@ -105,7 +74,7 @@ namespace Quartz
 	{
 		glfwMaximizeWindow(mpGLFWwindow);
 
-		// GLFW has no way to confirm if Maximize succeeded
+		// GLFW has no way to check the success of glfwMaximizeWindow
 		return true;
 	}
 
@@ -113,11 +82,75 @@ namespace Quartz
 	{
 		glfwIconifyWindow(mpGLFWwindow);
 
-		// GLFW has no way to confirm if Minimize(Iconify) succeeded
+		// GLFW has no way to check the success of glfwIconifyWindow
 		return true;
 	}
 
-	bool GLFWWindow::CloseRequested()
+	String GLFWWindow::GetTitle() const
+	{
+		return mTitle;
+	}
+
+	uSize GLFWWindow::GetWidth() const
+	{
+		int width;
+		glfwGetWindowSize(mpGLFWwindow, &width, nullptr);
+		return (uSize)width;
+	}
+
+	uSize GLFWWindow::GetHeight() const
+	{
+		int height;
+		glfwGetWindowSize(mpGLFWwindow, nullptr, &height);
+		return (uSize)height;
+	}
+
+	Vec2i GLFWWindow::GetSize() const
+	{
+		Vec2i size;
+		glfwGetWindowSize(mpGLFWwindow, &size.x, &size.y);
+		return size;
+	}
+
+	sSize GLFWWindow::GetPosX() const
+	{
+		int posX;
+		glfwGetWindowPos(mpGLFWwindow, &posX, nullptr);
+		return (sSize)posX;
+	}
+
+	sSize GLFWWindow::GetPosY() const
+	{
+		int posY;
+		glfwGetWindowPos(mpGLFWwindow, nullptr, &posY);
+		return (sSize)posY;
+	}
+
+	Point2i GLFWWindow::GetPosition() const
+	{
+		Point2i pos;
+		glfwGetWindowPos(mpGLFWwindow, &pos.x, &pos.y);
+		return pos;
+	}
+
+	Bounds2i GLFWWindow::GetBounds() const
+	{
+		Point2i pos = GetPosition();
+		Vec2i size = GetSize();
+		return Bounds2i(pos, pos + size);
+	}
+
+	bool GLFWWindow::IsOpen() const
+	{
+		return mWindowState == GLFW_WINDOW_STATE_OPEN;
+	}
+
+	bool GLFWWindow::IsClosed() const
+	{
+		return mWindowState != GLFW_WINDOW_STATE_OPEN;
+	}
+
+	bool GLFWWindow::IsCloseRequested() const
 	{
 		if (!mpGLFWwindow)
 		{
@@ -127,4 +160,13 @@ namespace Quartz
 		return glfwWindowShouldClose(mpGLFWwindow);
 	}
 
+	void* GLFWWindow::GetNativeHandle()
+	{
+		return mpGLFWwindow;
+	}
+
+	GLFWwindow* GLFWWindow::GetGLFWHandle()
+	{
+		return mpGLFWwindow;
+	}
 }

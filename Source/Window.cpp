@@ -3,52 +3,13 @@
 
 namespace Quartz
 {
-	Window::Window(const WindowInfo& info, Application* pParentApp)
-		: mTitle(info.title), 
-		mWidth(info.width), 
-		mHeight(info.height),
-		mPosX(info.posX),
-		mPosY(info.posY),
-		mpParent(pParentApp) { }
+	Window::Window(Application* pParentApp, Surface* pSurface) :
+		mpParent(pParentApp), 
+		mpSurface(pSurface) { }
 
-	String Window::GetTitle() const
+	Surface* Window::GetSurface()
 	{
-		return mTitle;
-	}
-
-	uSize Window::GetWidth() const
-	{
-		return mWidth;
-	}
-
-	uSize Window::GetHeight() const
-	{
-		return mHeight;
-	}
-
-	Vec2u Window::GetSize() const
-	{
-		return Vec2u(mWidth, mHeight);
-	}
-
-	uSize Window::GetPosX() const
-	{
-		return mPosX;
-	}
-
-	uSize Window::GetPosY() const
-	{
-		return mPosY;
-	}
-
-	Point2u Window::GetPosition() const
-	{
-		return Point2u(mPosX, mPosY);
-	}
-
-	Bounds2u Window::GetBounds() const
-	{
-		return Bounds2u(GetPosition(), GetSize());
+		return mpSurface;
 	}
 
 	Application* Window::GetParentApplication()
@@ -58,12 +19,15 @@ namespace Quartz
 
 	WindowInfo Window::GetWindowInfo() const
 	{
+		Point2i pos = GetPosition();
+		Vec2i size = GetSize();
+
 		WindowInfo info;
-		info.title	= mTitle;
-		info.width	= mWidth;
-		info.height	= mHeight;
-		info.posX	= mPosX;
-		info.posY	= mPosY;
+		info.title	= GetTitle();
+		info.width	= size.x;
+		info.height	= size.y;
+		info.posX	= pos.x;
+		info.posY	= pos.y;
 
 		return info;
 	}

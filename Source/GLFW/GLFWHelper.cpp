@@ -65,6 +65,9 @@ namespace Quartz
 
 		glfwSetWindowSizeCallback(pWindow->mpGLFWwindow, GLFWWindowSizeCallback);
 		glfwSetWindowPosCallback(pWindow->mpGLFWwindow, GLFWWindowPosCallback);
+		glfwSetWindowMaximizeCallback(pWindow->mpGLFWwindow, GLFWWindowMaximizedCallback);
+		glfwSetWindowIconifyCallback(pWindow->mpGLFWwindow, GLFWWindowMinimzedCallback);
+		glfwSetWindowFocusCallback(pWindow->mpGLFWwindow, GLFWWindowFocusedCallback);
 
 		// Assure app is registered
 		assert(smRegistry.Contains(handle));
@@ -89,10 +92,56 @@ namespace Quartz
 		}
 	}
 
-	void GLFWHelper::UpdateAndPollMessages()
+	void GLFWHelper::SetWindowState(GLFWWindow* pWindow, GLFWWindowState state)
 	{
-		glfwPollEvents();
+		pWindow->mWindowState = state;
 	}
+
+#ifdef QUARTZAPP_GLEW
+
+	GLSurface* GLFWHelper::CreateGLFWGLSurface()
+	{
+		return new GLSurface();
+	}
+
+	void GLFWHelper::DestroyGLFWGLSurface(GLSurface* pSurface)
+	{
+		delete pSurface;
+	}
+
+#endif
+
+#ifdef QUARTZAPP_VULKAN
+
+	VulkanSurface* GLFWHelper::CreateGLFWVulkanSurface(GLFWwindow* pGLFWwindow, const SurfaceInfo& info)
+	{
+		VulkanSurfaceApiInfo* pApiInfo = static_cast<VulkanSurfaceApiInfo*>(info.pApiInfo);
+
+		if (pApiInfo == nullptr)
+		{
+			printf("Failed to create (GLFW) VulkanSurface: Invalid apiInfo.");
+			return nullptr;
+		}
+
+		VkSurfaceKHR vkSurface;
+		VkResult error = glfwCreateWindowSurface(pApiInfo->vkInstance, pGLFWwindow, nullptr, &vkSurface);
+
+		if (error)
+		{
+			PrintError();
+			return nullptr;
+		}
+
+		return new VulkanSurface(pApiInfo->vkInstance, vkSurface);
+	}
+
+	void GLFWHelper::DestroyGLFWVulkanSurface(VulkanSurface* pSurface)
+	{
+		vkDestroySurfaceKHR(pSurface->GetVkInsance(), pSurface->GetVkSurface(), nullptr);
+		delete pSurface;
+	}
+
+#endif
 
 	void GLFWHelper::CallWindowSizeCallback(GLFWApplication* pApplication, GLFWWindow* pWindow, int width, int height)
 	{
@@ -104,6 +153,14 @@ namespace Quartz
 	{
 		if(pApplication->mWindowMovedFunc)
 			pApplication->mWindowMovedFunc(pWindow, (uSize)posX, (uSize)posY);
+	}
+
+	bool GLFWHelper::CallWindowCloseRequestedCallback(GLFWApplication* pApplication, GLFWWindow* pWindow)
+	{
+		if (pApplication->mWindowCloseRequestedFunc)
+			return pApplication->mWindowCloseRequestedFunc(pWindow);
+
+		return true;
 	}
 
 	void GLFWHelper::CallWindowClosedCallback(GLFWApplication* pApplication, GLFWWindow* pWindow)
@@ -176,20 +233,50 @@ void GLFWWindowPosCallback(GLFWwindow* pGLFWwindow, int posX, int posY)
 
 void GLFWWindowClosedCallback(GLFWwindow* pGLFWwindow)
 {
+	using namespace Quartz;
 
+	GLFWWindow* pWindow = (GLFWWindow*)glfwGetWindowUserPointer(pGLFWwindow);
+	GLFWApplication* pApp = (GLFWApplication*)pWindow->GetParentApplication();
+
+	GLFWHelper::CallWindowClosedCallback(pApp, pWindow);
 }
 
-void GLFWWindowMaximizedCallback(GLFWwindow* pGLFWwindow, int mazimized)
+bool GLFWWindowCloseRequestedCallback(GLFWwindow* pGLFWwindow)
 {
+	using namespace Quartz;
 
+	GLFWWindow* pWindow = (GLFWWindow*)glfwGetWindowUserPointer(pGLFWwindow);
+	GLFWApplication* pApp = (GLFWApplication*)pWindow->GetParentApplication();
+
+	return GLFWHelper::CallWindowCloseRequestedCallback(pApp, pWindow);
+}
+
+void GLFWWindowMaximizedCallback(GLFWwindow* pGLFWwindow, int maximized)
+{
+	using namespace Quartz;
+
+	GLFWWindow* pWindow = (GLFWWindow*)glfwGetWindowUserPointer(pGLFWwindow);
+	GLFWApplication* pApp = (GLFWApplication*)pWindow->GetParentApplication();
+
+	GLFWHelper::CallWindowMaximizedCallback(pApp, pWindow, maximized);
 }
 
 void GLFWWindowMinimzedCallback(GLFWwindow* pGLFWwindow, int minimized)
 {
+	using namespace Quartz;
 
+	GLFWWindow* pWindow = (GLFWWindow*)glfwGetWindowUserPointer(pGLFWwindow);
+	GLFWApplication* pApp = (GLFWApplication*)pWindow->GetParentApplication();
+
+	GLFWHelper::CallWindowMinimizedCallback(pApp, pWindow, minimized);
 }
 
 void GLFWWindowFocusedCallback(GLFWwindow* pGLFWwindow, int focused)
 {
+	using namespace Quartz;
 
+	GLFWWindow* pWindow = (GLFWWindow*)glfwGetWindowUserPointer(pGLFWwindow);
+	GLFWApplication* pApp = (GLFWApplication*)pWindow->GetParentApplication();
+
+	GLFWHelper::CallWindowFocusedCallback(pApp, pWindow, focused);
 }

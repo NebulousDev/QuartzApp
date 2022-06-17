@@ -1,19 +1,14 @@
 #pragma once
 
+#include "DLL.h"
 #include "Types/Types.h"
 #include "Types/String.h"
 #include "Math/Bounds.h"
+#include "Surface.h"
 
 namespace Quartz
 {
 	class Application;
-
-	enum WindowState
-	{
-		WINDOW_STATE_UNINITIALZED,
-		WINDOW_STATE_CLOSED,
-		WINDOW_STATE_OPEN
-	};
 
 	struct WindowInfo
 	{
@@ -24,22 +19,17 @@ namespace Quartz
 		uSize		posY;
 	};
 
-	class Window
+	class QUARTZAPP_API Window
 	{
 	protected:
-		String		mTitle;
-		uSize		mWidth;
-		uSize		mHeight;
-		uSize		mPosX;
-		uSize		mPosY;
-
-		Application* mpParent;
+		Application*	mpParent;
+		Surface*		mpSurface;
 
 	public:
-		Window(const WindowInfo& info, Application* pParentApp);
+		Window(Application* pParentApp, Surface* pSurface);
 
-		virtual bool Create() = 0;
-		virtual void Destroy() = 0;
+		virtual bool RequestClose() = 0;
+		virtual void Close() = 0;
 
 		virtual bool SetTitle(const String& title) = 0;
 		virtual bool Resize(uSize width, uSize height) = 0;
@@ -50,18 +40,24 @@ namespace Quartz
 		virtual bool Maximize() = 0;
 		virtual bool Minimize() = 0;
 
-		String GetTitle() const;
-		uSize GetWidth() const;
-		uSize GetHeight() const;
-		Vec2u GetSize() const;
-		uSize GetPosX() const;
-		uSize GetPosY() const;
-		Point2u GetPosition() const;
-		Bounds2u GetBounds() const;
+		virtual String GetTitle() const = 0;
+		virtual uSize GetWidth() const = 0;
+		virtual uSize GetHeight() const = 0;
+		virtual Vec2i GetSize() const = 0;
+		virtual sSize GetPosX() const = 0;
+		virtual sSize GetPosY() const = 0;
+		virtual Point2i GetPosition() const = 0;
+		virtual Bounds2i GetBounds() const = 0;
 
-		virtual bool CloseRequested() = 0;
+		virtual bool IsOpen() const = 0;
+		virtual bool IsClosed() const = 0;
+		virtual bool IsCloseRequested() const = 0;
+
+		virtual void* GetNativeHandle() = 0;
 
 		Application* GetParentApplication();
+		Surface* GetSurface();
+
 		WindowInfo GetWindowInfo() const;
 	};
 }

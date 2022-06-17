@@ -15,7 +15,8 @@ namespace Quartz
 		bool Create() override;
 		void Destroy() override;
 
-		Window* CreateWindow(const WindowInfo& info) override;
+		Window* CreateWindow(const WindowInfo& info, const SurfaceInfo& surfaceInfo) override;
+		void CloseWindow(Window* pWindow) override;
 		void DestroyWindow(Window* pWindow) override;
 
 		void Update() override;

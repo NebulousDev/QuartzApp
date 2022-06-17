@@ -16,6 +16,7 @@ include(GNUInstallDirs)
 
 set(QUARTZAPP_FOUND_LIBS)
 set(QUARTZAPP_FOUND_INCLUDES)
+set(QUARTZAPP_COMIPLE_DEFINITIONS)
 
 if(QUARTZAPP_ENABLE_GLFW)
 
@@ -24,7 +25,7 @@ if(QUARTZAPP_ENABLE_GLFW)
 	if(${glfw3_FOUND})
 
 		set(QUARTZAPP_FOUND_LIBS ${QUARTZAPP_FOUND_LIBS} glfw)
-		set(QUARTZAPP_GLFW TRUE)
+		set(QUARTZAPP_COMIPLE_DEFINITIONS ${QUARTZAPP_COMIPLE_DEFINITIONS} QUARTZAPP_GLFW)
 
 		message("[QuartzApp] GLFW found: ${glfw3_DIR}")
 
@@ -43,7 +44,7 @@ if(QUARTZAPP_ENABLE_GLEW)
 	if(${GLEW_FOUND})
 
 		set(QUARTZAPP_FOUND_LIBS ${QUARTZAPP_FOUND_LIBS} GLEW::GLEW)
-		set(QUARTZAPP_GLEW TRUE)
+		set(QUARTZAPP_COMIPLE_DEFINITIONS ${QUARTZAPP_COMIPLE_DEFINITIONS} QUARTZAPP_GLEW)
 
 		message("[QuartzApp] GLEW found: ${GLEW_DIR}")
 
@@ -62,7 +63,7 @@ if(QUARTZAPP_ENABLE_VULKAN)
 	if(${Vulkan_FOUND})
 
 		set(QUARTZAPP_FOUND_LIBS ${QUARTZAPP_FOUND_LIBS} Vulkan::Vulkan Vulkan::Headers)
-		set(QUARTZAPP_VULKAN TRUE)
+		set(QUARTZAPP_COMIPLE_DEFINITIONS ${QUARTZAPP_COMIPLE_DEFINITIONS} QUARTZAPP_VULKAN)
 
 		message("[QuartzApp] Vulkan found: ${Vulkan_LIBRARY}")
 
@@ -81,7 +82,7 @@ if(QUARTZAPP_ENABLE_DX12)
 	if(${directx-headers_FOUND})
 
 		set(QUARTZAPP_FOUND_LIBS ${QUARTZAPP_FOUND_LIBS} Microsoft::DirectX-Guids Microsoft::DirectX-Headers)
-		set(QUARTZAPP_DX12 TRUE)
+		set(QUARTZAPP_COMIPLE_DEFINITIONS ${QUARTZAPP_COMIPLE_DEFINITIONS} QUARTZAPP_DX12)
 
 		message("[QuartzApp] DX12 found: ${directx-headers_DIR}")
 
@@ -131,9 +132,9 @@ add_library(${PROJECT_NAME} SHARED
 	"Source/GLFW/GLFWHelper.cpp"
 	"Source/Surface.cpp" 
 	"Source/Vulkan/VulkanSurface.cpp"
-)
+ "Source/Vulkan/VulkanHelper.h" "Include/OpenGL/GLSurface.h" "Source/OpenGL/GLSurface.cpp")
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE QUARTZ_DLL)
+target_compile_definitions(${PROJECT_NAME} PRIVATE QUARTZAPP_DLL ${QUARTZAPP_COMIPLE_DEFINITIONS})
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 

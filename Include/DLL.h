@@ -1,16 +1,16 @@
-#ifdef QUARTZ_DLL
+#ifdef QUARTZAPP_DLL
 
 #ifdef _WIN32
 
-#define QUARTZ_API __declspec(dllexport)
+#define QUARTZAPP_API __declspec(dllexport)
 
 #elif defined __GNUC__
 
-#define QUARTZ_API __attribute__((visibility("default")))
+#define QUARTZAPP_API __attribute__((visibility("default")))
 
 #else
 
-#define QUARTZ_API
+#define QUARTZAPP_API
 
 #endif
 
@@ -18,15 +18,15 @@
 
 #ifdef _WIN32
 
-#define QUARTZ_API __declspec(dllimport)
+#define QUARTZAPP_API __declspec(dllimport)
 
 #elif defined __GNUC__
 
-#define QUARTZ_API
+#define QUARTZAPP_API
 
 #else
 
-#define QUARTZ_API
+#define QUARTZAPP_API
 
 #endif
 
