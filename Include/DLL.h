@@ -6,13 +6,17 @@
 
 #elif defined __GNUC__
 
-#define QUARTZAPP_API __attribute__((visibility("default")))
+#define QUARTZAPP_API __attribute__ ((visibility ("default")))
 
 #else
 
 #define QUARTZAPP_API
 
 #endif
+
+#elif defined QUARTZAPP_STATIC
+
+#define QUARTZAPP_API
 
 #else
 

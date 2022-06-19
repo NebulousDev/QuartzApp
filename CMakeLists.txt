@@ -1,16 +1,16 @@
-cmake_minimum_required(VERSION 3.22.0)
+cmake_minimum_required(VERSION 3.20.0)
 
-option(QUARTZAPP_EXPOSE_APIS	"Expose enabled APIs to parent project" OFF)
+option(QUARTZAPP_BUILD_STATIC       "Build as a static library"                     OFF)
+option(QUARTZAPP_EXPOSE_APIS        "Expose enabled APIs to parent project"         ON)
+option(QUARTZAPP_ENABLE_GLFW        "Enable GLFW window creation abilities"         ON)
+option(QUARTZAPP_ENABLE_GLEW        "Enable GLEW OpenGL context creation"           ON)
+option(QUARTZAPP_ENABLE_VULKAN      "Enable Vulkan context creation"                ON)
+option(QUARTZAPP_ENABLE_DX12        "Enable DX12 context creation"                  ON)
+option(QUARTZAPP_GENERATE_CONFIGS   "Enable generation of QuartzAppConfig.cmake"    ON)
 
-option(QUARTZAPP_ENABLE_GLFW	"Enable GLFW window creation abilities"	ON)
-option(QUARTZAPP_ENABLE_GLEW	"Enable GLEW OpenGL context creation"	ON)
-option(QUARTZAPP_ENABLE_VULKAN	"Enable Vulkan context creation"		ON)
-option(QUARTZAPP_ENABLE_DX12	"Enable DX12 context creation"			ON)
+set(QUARTZAPP_INCLUDE_PREFIX "Quartz" CACHE STRING "Include prefix for installed headers")
 
-option(QUARTZAPP_GENERATE_CONFIGS 
-	"Enable generation of QuartzAppConfig.cmake" ON)
-
-project(QuartzApp)
+project(QuartzApp VERSION 1.0.0)
 
 include(GNUInstallDirs)
 
@@ -18,14 +18,26 @@ set(QUARTZAPP_FOUND_LIBS)
 set(QUARTZAPP_FOUND_INCLUDES)
 set(QUARTZAPP_COMIPLE_DEFINITIONS)
 
+set(QUARTZAPP_SOURCE_FILES
+	"Source/Application.cpp"
+	"Source/Window.cpp"
+	"Source/Surface.cpp"
+)
+
 if(QUARTZAPP_ENABLE_GLFW)
 
-	find_package(glfw3)
+	find_package(glfw3 QUIET)
 
 	if(${glfw3_FOUND})
 
 		set(QUARTZAPP_FOUND_LIBS ${QUARTZAPP_FOUND_LIBS} glfw)
 		set(QUARTZAPP_COMIPLE_DEFINITIONS ${QUARTZAPP_COMIPLE_DEFINITIONS} QUARTZAPP_GLFW)
+
+		set(QUARTZAPP_SOURCE_FILES ${QUARTZAPP_SOURCE_FILES}
+			"Source/GLFW/GLFWApplication.cpp"
+			"Source/GLFW/GLFWWindow.cpp"
+			"Source/GLFW/GLFWHelper.cpp"
+		)
 
 		message("[QuartzApp] GLFW found: ${glfw3_DIR}")
 
@@ -39,12 +51,16 @@ endif()
 
 if(QUARTZAPP_ENABLE_GLEW)
 
-	find_package(GLEW)
+	find_package(GLEW QUIET)
 
 	if(${GLEW_FOUND})
 
 		set(QUARTZAPP_FOUND_LIBS ${QUARTZAPP_FOUND_LIBS} GLEW::GLEW)
 		set(QUARTZAPP_COMIPLE_DEFINITIONS ${QUARTZAPP_COMIPLE_DEFINITIONS} QUARTZAPP_GLEW)
+
+		set(QUARTZAPP_SOURCE_FILES ${QUARTZAPP_SOURCE_FILES}
+			"Source/OpenGL/GLSurface.cpp"
+		)
 
 		message("[QuartzApp] GLEW found: ${GLEW_DIR}")
 
@@ -58,12 +74,17 @@ endif()
 
 if(QUARTZAPP_ENABLE_VULKAN)
 
-	find_package(Vulkan)
+	# Note: This *should* be using CMake's built-in FindVulkan module 
+	find_package(Vulkan QUIET)
 
 	if(${Vulkan_FOUND})
 
 		set(QUARTZAPP_FOUND_LIBS ${QUARTZAPP_FOUND_LIBS} Vulkan::Vulkan Vulkan::Headers)
 		set(QUARTZAPP_COMIPLE_DEFINITIONS ${QUARTZAPP_COMIPLE_DEFINITIONS} QUARTZAPP_VULKAN)
+
+		set(QUARTZAPP_SOURCE_FILES ${QUARTZAPP_SOURCE_FILES}
+			"Source/Vulkan/VulkanSurface.cpp"
+		)
 
 		message("[QuartzApp] Vulkan found: ${Vulkan_LIBRARY}")
 
@@ -77,7 +98,7 @@ endif()
 
 if(QUARTZAPP_ENABLE_DX12)
 
-	find_package(directx-headers)
+	find_package(directx-headers QUIET)
 
 	if(${directx-headers_FOUND})
 
@@ -96,8 +117,8 @@ endif()
 
 if(NOT ${QUARTZ_SUPERBUILD})
 
-	find_package(quartzlib)
-	find_package(quartzmath)
+	find_package(quartzlib QUIET)
+	find_package(quartzmath QUIET)
 
 	if(${quartzlib_FOUND})
 
@@ -124,17 +145,19 @@ else()
 
 endif()
 
-add_library(${PROJECT_NAME} SHARED
-	"Source/Application.cpp"
-	"Source/Window.cpp"
-	"Source/GLFW/GLFWApplication.cpp"
-	"Source/GLFW/GLFWWindow.cpp"
-	"Source/GLFW/GLFWHelper.cpp"
-	"Source/Surface.cpp" 
-	"Source/Vulkan/VulkanSurface.cpp"
- "Source/Vulkan/VulkanHelper.h" "Include/OpenGL/GLSurface.h" "Source/OpenGL/GLSurface.cpp")
+if(QUARTZAPP_BUILD_STATIC)
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE QUARTZAPP_DLL ${QUARTZAPP_COMIPLE_DEFINITIONS})
+	add_library(${PROJECT_NAME} STATIC ${QUARTZAPP_SOURCE_FILES})
+
+	set(QUARTZAPP_COMIPLE_DEFINITIONS ${QUARTZAPP_COMIPLE_DEFINITIONS} QUARTZAPP_STATIC)
+
+else()
+	
+	add_library(${PROJECT_NAME} SHARED ${QUARTZAPP_SOURCE_FILES})
+
+	set(QUARTZAPP_COMIPLE_DEFINITIONS ${QUARTZAPP_COMIPLE_DEFINITIONS} QUARTZAPP_DLL)
+
+endif()
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
@@ -143,21 +166,25 @@ if(QUARTZAPP_EXPOSE_APIS)
 	set(QUARTZAPP_PUBLIC_INCLUDES	${QUARTZAPP_FOUND_INCLUDES})
 	set(QUARTZAPP_PUBLIC_LIBS		${QUARTZAPP_FOUND_LIBS})
 
+	target_compile_definitions(${PROJECT_NAME} PUBLIC ${QUARTZAPP_COMIPLE_DEFINITIONS})
+
 else()
 
 	set(QUARTZAPP_PRIVATE_INCLUDES	${QUARTZAPP_FOUND_INCLUDES})
 	set(QUARTZAPP_PRIVATE_LIBS		${QUARTZAPP_FOUND_LIBS})
+
+	target_compile_definitions(${PROJECT_NAME} PRIVATE ${QUARTZAPP_COMIPLE_DEFINITIONS})
 
 endif()
 
 target_include_directories(${PROJECT_NAME} 
 	PUBLIC 
 		"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Include>"
+		"$<BUILD_INTERFACE:${QUARTZAPP_PUBLIC_INCLUDES}>"
 		"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
-		${QUARTZAPP_PUBLIC_INCLUDES}
 	PRIVATE
 		"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Source>"
-		${QUARTZAPP_PRIVATE_INCLUDES}
+		"$<BUILD_INTERFACE:${QUARTZAPP_PRIVATE_INCLUDES}>"
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -168,7 +195,7 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 # Generate QuartzAppConfig.cmake
-if(NOT ${QUARTZ_SUPERBUILD} AND QUARTZAPP_GENERATE_CONFIGS)
+if(QUARTZAPP_GENERATE_CONFIGS)
 
 	install(
 		TARGETS ${PROJECT_NAME} 
@@ -177,16 +204,16 @@ if(NOT ${QUARTZ_SUPERBUILD} AND QUARTZAPP_GENERATE_CONFIGS)
 	)
 
 	install(
-		DIRECTORY "Include/" 
-		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-	)
-
-	install(
 		EXPORT ${PROJECT_NAME}-Export 
 		FILE ${PROJECT_NAME}Config.cmake 
 		DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}"
 	)
 
-	message("[QuartzApp] Generating ${PROJECT_NAME}Config.cmake...")
+	install(
+		DIRECTORY "${PROJECT_SOURCE_DIR}/Include/" 
+		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${QUARTZAPP_INCLUDE_PREFIX}
+	)
+
+	message("[${PROJECT_NAME}] Generating ${PROJECT_NAME}Config.cmake...")
 
 endif()

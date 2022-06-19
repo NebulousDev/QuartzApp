@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "dependencies": [
     "quartzlib",
+    "quartzmath",
     "glfw3",
     "glew",
-    "vulkan",
-    "directx-headers"
+    {
+      "name": "directx-headers",
+      "platform": "windows"
+    }
   ]
 }
