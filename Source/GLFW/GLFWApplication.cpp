@@ -74,13 +74,13 @@ namespace Quartz
 			case SURFACE_API_DX12:
 			{
 				printf("Error creating GLFW Window: DX12 is not available for GLFW windows.");
-				return false;
+				return nullptr;
 			}
 
 			default:
 			{
 				printf("Error creating GLFW Window: Invalid SurfaceAPI enum.");
-				return false;
+				return nullptr;
 			}
 		}
 
@@ -89,7 +89,7 @@ namespace Quartz
 		if (!pGLFWwindow)
 		{
 			GLFWHelper::PrintError();
-			return false;
+			return nullptr;
 		}
 
 		switch (surfaceInfo.surfaceApi)
@@ -100,11 +100,11 @@ namespace Quartz
 				pSurface = GLFWHelper::CreateGLFWGLSurface();
 #else
 				printf("Error creating GLFW Vulkan Window: Vulkan is not available.");
-				return false;
+				return nullptr;
 #endif
 				if (!pSurface)
 				{
-					return false;
+					return nullptr;
 				}
 
 				break;
@@ -117,11 +117,11 @@ namespace Quartz
 				pSurface = GLFWHelper::CreateGLFWVulkanSurface(pGLFWwindow, surfaceInfo);
 #else
 				printf("Error creating GLFW GL Window: GLEW is not available.");
-				return false;
+				return nullptr;
 #endif
 				if (!pSurface)
 				{
-					return false;
+					return nullptr;
 				}
 
 				break;

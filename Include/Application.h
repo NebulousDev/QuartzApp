@@ -2,6 +2,7 @@
 
 #include "Types/String.h"
 #include "Window.h"
+#include "Surface.h"
 #include "DLL.h"
 
 namespace Quartz
