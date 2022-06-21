@@ -130,6 +130,21 @@ namespace Quartz
 
 		pWindow = new GLFWWindow(this, pGLFWwindow, info.title, pSurface);
 
+		if (info.hints & WINDOW_FULLSCREEN)
+		{
+			pWindow->SetFullscreen(true);
+		}
+
+		if (info.hints & WINDOW_BORDERLESS)
+		{
+			pWindow->SetBorderless(true);
+		}
+
+		if (info.hints & WINDOW_NO_RESIZE)
+		{
+			pWindow->SetNoResize(true);
+		}
+
 		glfwSetWindowUserPointer(pGLFWwindow, (void*)pWindow);
 
 		GLFWHelper::RegisterAppWindow(this, pWindow);
@@ -161,6 +176,21 @@ namespace Quartz
 		GLFWHelper::UnregisterAppWindow(this, pGLFWWindow);
 
 		delete pGLFWWindow;
+	}
+
+	bool GLFWApplication::IsRawInputAvailable() const
+	{
+		return false;
+	}
+
+	bool GLFWApplication::IsRawInputEnabled() const
+	{
+		return false;
+	}
+
+	bool GLFWApplication::UseRawInput(bool useRawInput)
+	{
+		return false;
 	}
 
 	void GLFWApplication::Update()

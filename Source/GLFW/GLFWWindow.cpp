@@ -11,7 +11,8 @@ namespace Quartz
 	GLFWWindow::GLFWWindow(Application* pParentApp, GLFWwindow* pGLFWwindow, const String& title, Surface* pSurface) :
 		Window(pParentApp, pSurface),
 		mpGLFWwindow(pGLFWwindow),
-		mTitle(title) { }
+		mTitle(title),
+		mWindowState(GLFW_WINDOW_STATE_UNINITIALZED) { }
 
 	bool GLFWWindow::RequestClose()
 	{
@@ -50,7 +51,7 @@ namespace Quartz
 		return Resize(size.x, size.y);
 	}
 
-	bool GLFWWindow::Move(uSize posX, uSize posY)
+	bool GLFWWindow::Move(sSize posX, sSize posY)
 	{
 		glfwSetWindowPos(mpGLFWwindow, posX, posY);
 
@@ -58,16 +59,21 @@ namespace Quartz
 		return true; 
 	}
 
-	bool GLFWWindow::Move(const Point2u& pos)
+	bool GLFWWindow::Move(const Point2i& pos)
 	{
 		return Move(pos.x, pos.y);
 	}
 
-	bool GLFWWindow::SetBounds(const Bounds2u& bounds)
+	bool GLFWWindow::SetBounds(const Bounds2i& bounds)
 	{
-		return 
-			Resize(bounds.Extent()) &&
-			Move(bounds.BottomLeft());
+		Vec2i   size = bounds.Extent();
+		Point2i pos  = bounds.BottomLeft();
+
+		glfwSetWindowSize(mpGLFWwindow, size.x, size.y);
+		glfwSetWindowPos(mpGLFWwindow, pos.x, pos.y);
+
+		// GLFW has no way to check success
+		return true;
 	}
 
 	bool GLFWWindow::Maximize()
@@ -158,6 +164,152 @@ namespace Quartz
 		}
 
 		return glfwWindowShouldClose(mpGLFWwindow);
+	}
+
+	bool GLFWWindow::IsFullscreenAvailable() const
+	{
+		return true;
+	}
+
+	bool GLFWWindow::IsFullscreen() const
+	{
+		return glfwGetWindowMonitor(mpGLFWwindow) == nullptr;
+	}
+
+	bool GLFWWindow::SetFullscreen(bool fullscreen)
+	{
+		if (fullscreen == (glfwGetWindowMonitor(mpGLFWwindow) != nullptr))
+		{
+			return true;
+		}
+
+		if (fullscreen)
+		{
+			GLFWmonitor* pMonitor = glfwGetPrimaryMonitor();
+			Vec2i size = GetSize();
+
+			glfwSetWindowMonitor(mpGLFWwindow, pMonitor, 0, 0, size.x, size.y, GLFW_DONT_CARE); // TODO: custom refresh rate
+
+			if (glfwGetWindowMonitor(mpGLFWwindow) == nullptr)
+			{
+				printf("Error setting window fullscreen: glfwSetWindowMonitor() failed.");
+				return false;
+			}
+		}
+		else
+		{
+			Point2i pos = GetPosition();
+			Vec2i size  = GetSize();
+
+			glfwSetWindowMonitor(mpGLFWwindow, nullptr, pos.x, pos.y, size.x, size.y, 0);
+		}
+
+		return true;
+	}
+
+	bool GLFWWindow::IsBorderlessAvailable() const
+	{
+		return true;
+	}
+
+	bool GLFWWindow::IsBorderless() const
+	{
+		return glfwGetWindowAttrib(mpGLFWwindow, GLFW_DECORATED) == GLFW_FALSE;
+	}
+
+	bool GLFWWindow::SetBorderless(bool borderless)
+	{
+		if (borderless == (glfwGetWindowAttrib(mpGLFWwindow, GLFW_DECORATED) == GLFW_TRUE))
+		{
+			return true;
+		}
+
+		int glfwBool = borderless ? GLFW_FALSE : GLFW_TRUE; // Note: Inverted
+
+		glfwSetWindowAttrib(mpGLFWwindow, GLFW_DECORATED, glfwBool);
+
+		if (glfwGetWindowAttrib(mpGLFWwindow, GLFW_DECORATED) != glfwBool)
+		{
+			printf("Error setting window borderless: glfwSetWindowAttrib() failed.");
+			return false;
+		}
+
+		return true;
+	}
+
+	bool GLFWWindow::IsNoResizeAvailable() const
+	{
+		return true;
+	}
+
+	bool GLFWWindow::IsNoResize() const
+	{
+		return glfwGetWindowAttrib(mpGLFWwindow, GLFW_RESIZABLE) == GLFW_FALSE;
+	}
+
+	bool GLFWWindow::SetNoResize(bool noResize)
+	{
+		if (noResize == (glfwGetWindowAttrib(mpGLFWwindow, GLFW_RESIZABLE) == GLFW_TRUE))
+		{
+			return true;
+		}
+
+		int glfwBool = noResize ? GLFW_FALSE : GLFW_TRUE; // Note: Inverted
+
+		glfwSetWindowAttrib(mpGLFWwindow, GLFW_RESIZABLE, glfwBool);
+
+		if (glfwGetWindowAttrib(mpGLFWwindow, GLFW_RESIZABLE) != glfwBool)
+		{
+			printf("Error setting window unresizable: glfwSetWindowAttrib() failed.");
+			return false;
+		}
+
+		return true;
+	}
+
+	bool GLFWWindow::IsTopmostAvailable() const
+	{
+		return false;
+	}
+
+	bool GLFWWindow::IsTopmost() const
+	{
+		return false;
+	}
+
+	bool GLFWWindow::SetTopmost(bool topmost)
+	{
+		return false;
+	}
+
+	bool GLFWWindow::IsInvisibleAvailable() const
+	{
+		return true;
+	}
+
+	bool GLFWWindow::IsInvisible() const
+	{
+		return glfwGetWindowAttrib(mpGLFWwindow, GLFW_VISIBLE);
+	}
+
+	bool GLFWWindow::SetInvisible(bool invisible)
+	{
+		if (invisible == (glfwGetWindowAttrib(mpGLFWwindow, GLFW_VISIBLE) == GLFW_FALSE))
+		{
+			return true;
+		}
+
+		int glfwBool = invisible ? GLFW_FALSE : GLFW_TRUE; // Note: Inverted
+
+		glfwSetWindowAttrib(mpGLFWwindow, GLFW_VISIBLE, glfwBool);
+
+		if (glfwGetWindowAttrib(mpGLFWwindow, GLFW_VISIBLE) != glfwBool)
+		{
+			printf("Error setting window visibility: glfwSetWindowAttrib() failed.");
+			return false;
+		}
+
+		return true;
 	}
 
 	void* GLFWWindow::GetNativeHandle()

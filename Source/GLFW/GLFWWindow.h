@@ -36,9 +36,9 @@ namespace Quartz
 		bool SetTitle(const String& title) override;
 		bool Resize(uSize width, uSize height) override;
 		bool Resize(const Vec2u size) override;
-		bool Move(uSize posX, uSize posY) override;
-		bool Move(const Point2u& pos) override;
-		bool SetBounds(const Bounds2u& bounds) override;
+		bool Move(sSize posX, sSize posY) override;
+		bool Move(const Point2i& pos) override;
+		bool SetBounds(const Bounds2i& bounds) override;
 		bool Maximize() override;
 		bool Minimize() override;
 
@@ -54,6 +54,26 @@ namespace Quartz
 		bool IsOpen() const override;
 		bool IsClosed() const override;
 		bool IsCloseRequested() const override;
+
+		bool IsFullscreenAvailable() const override;
+		bool IsFullscreen() const override;
+		bool SetFullscreen(bool fullscreen) override;
+
+		bool IsBorderlessAvailable() const override;
+		bool IsBorderless() const override;
+		bool SetBorderless(bool borderless) override;
+
+		bool IsNoResizeAvailable() const override;
+		bool IsNoResize() const override;
+		bool SetNoResize(bool noResize) override;
+
+		bool IsTopmostAvailable() const override;
+		bool IsTopmost() const override;
+		bool SetTopmost(bool topmost) override;
+
+		bool IsInvisibleAvailable() const override;
+		bool IsInvisible() const override;
+		bool SetInvisible(bool invisible) override;
 
 		void* GetNativeHandle() override;
 

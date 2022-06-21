@@ -22,19 +22,28 @@ namespace Quartz
 		WINDOW_API_WINAPI
 	};
 
+	enum ApplicationHint
+	{
+		APPLICATION_HINT_USE_RAW_INPUT = 0x1
+	};
+
+	typedef flags32 ApplicationHints;
+
 	struct ApplicationInfo
 	{
-		WindowAPI	windowApi;
-		String		appName;
-		String		version;
+		WindowAPI			windowApi;
+		String				appName;
+		String				version;
+		ApplicationHints	hints;
 	};
 
 	class QUARTZAPP_API Application
 	{
 	protected:
-		String		mAppName;
-		String		mVersion;
-		WindowAPI	mWindowAPI;
+		String				mAppName;
+		String				mVersion;
+		WindowAPI			mWindowAPI;
+		ApplicationHints	mHints;
 
 		WindowResizedCallbackFunc			mWindowResizedFunc;
 		WindowMovedCallbackFunc				mWindowMovedFunc;
@@ -53,6 +62,10 @@ namespace Quartz
 		virtual Window* CreateWindow(const WindowInfo& info, const SurfaceInfo& surfaceInfo) = 0;
 		virtual void CloseWindow(Window* pWindow) = 0;
 		virtual void DestroyWindow(Window* pWindow) = 0;
+
+		virtual bool IsRawInputAvailable() const = 0;
+		virtual bool IsRawInputEnabled() const = 0;
+		virtual bool UseRawInput(bool useRawInput) = 0;
 
 		void SetWindowResizedCallback(WindowResizedCallbackFunc callback);
 		void SetWindowMovedCallback(WindowMovedCallbackFunc callback);

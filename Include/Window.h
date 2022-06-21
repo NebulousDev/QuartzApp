@@ -10,6 +10,18 @@ namespace Quartz
 {
 	class Application;
 
+	enum WindowHint
+	{
+		WINDOW_WINDOWED		= 0x01,
+		WINDOW_FULLSCREEN	= 0x02,
+		WINDOW_BORDERLESS	= 0x04,
+		WINDOW_NO_RESIZE	= 0x08,
+		WINDOW_TOPMOST		= 0x10,
+		WINDOW_INVISIBLE	= 0x20
+	};
+
+	typedef flags32 WindowHints;
+
 	struct WindowInfo
 	{
 		String		title;
@@ -17,6 +29,7 @@ namespace Quartz
 		uSize		height;
 		uSize		posX;
 		uSize		posY;
+		WindowHints	hints;
 	};
 
 	class QUARTZAPP_API Window
@@ -34,9 +47,9 @@ namespace Quartz
 		virtual bool SetTitle(const String& title) = 0;
 		virtual bool Resize(uSize width, uSize height) = 0;
 		virtual bool Resize(const Vec2u size) = 0;
-		virtual bool Move(uSize posX, uSize posY) = 0;
-		virtual bool Move(const Point2u& pos) = 0;
-		virtual bool SetBounds(const Bounds2u& bounds) = 0;
+		virtual bool Move(sSize posX, sSize posY) = 0;
+		virtual bool Move(const Point2i& pos) = 0;
+		virtual bool SetBounds(const Bounds2i& bounds) = 0;
 		virtual bool Maximize() = 0;
 		virtual bool Minimize() = 0;
 
@@ -52,6 +65,28 @@ namespace Quartz
 		virtual bool IsOpen() const = 0;
 		virtual bool IsClosed() const = 0;
 		virtual bool IsCloseRequested() const = 0;
+
+		// Note: if your graphics api allows exclusive fullscreen
+		//		 it should be used instead of these functions
+		virtual bool IsFullscreenAvailable() const = 0;
+		virtual bool IsFullscreen() const = 0;
+		virtual bool SetFullscreen(bool fullscreen) = 0;
+
+		virtual bool IsBorderlessAvailable() const = 0;
+		virtual bool IsBorderless() const = 0;
+		virtual bool SetBorderless(bool borderless) = 0;
+
+		virtual bool IsNoResizeAvailable() const = 0;
+		virtual bool IsNoResize() const = 0;
+		virtual bool SetNoResize(bool noResize) = 0;
+
+		virtual bool IsTopmostAvailable() const = 0;
+		virtual bool IsTopmost() const = 0;
+		virtual bool SetTopmost(bool topmost) = 0;
+
+		virtual bool IsInvisibleAvailable() const = 0;
+		virtual bool IsInvisible() const = 0;
+		virtual bool SetInvisible(bool invisible) = 0;
 
 		virtual void* GetNativeHandle() = 0;
 

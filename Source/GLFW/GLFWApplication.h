@@ -19,6 +19,10 @@ namespace Quartz
 		void CloseWindow(Window* pWindow) override;
 		void DestroyWindow(Window* pWindow) override;
 
+		bool IsRawInputAvailable() const override;
+		bool IsRawInputEnabled() const override;
+		bool UseRawInput(bool useRawInput) override;
+
 		void Update() override;
 		
 		void* GetNativeHandle() override;
