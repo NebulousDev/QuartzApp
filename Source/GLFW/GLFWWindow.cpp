@@ -25,6 +25,11 @@ namespace Quartz
 		mpParent->CloseWindow(this);
 	}
 
+	bool GLFWWindow::RecreateSurface(const SurfaceInfo& info)
+	{
+		return true;
+	}
+
 	bool GLFWWindow::SetTitle(const String& title)
 	{
 		glfwSetWindowTitle(mpGLFWwindow, title.Str());
@@ -275,21 +280,6 @@ namespace Quartz
 		}
 
 		return true;
-	}
-
-	bool GLFWWindow::IsTopmostAvailable() const
-	{
-		return false;
-	}
-
-	bool GLFWWindow::IsTopmost() const
-	{
-		return false;
-	}
-
-	bool GLFWWindow::SetTopmost(bool topmost)
-	{
-		return false;
 	}
 
 	bool GLFWWindow::IsInvisibleAvailable() const

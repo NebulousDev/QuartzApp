@@ -15,21 +15,30 @@ namespace Quartz
 
 	Window* WinApiApplication::CreateWindow(const WindowInfo& info, const SurfaceInfo& surfaceInfo)
 	{
-		DWORD  dwStyle = WS_OVERLAPPEDWINDOW | WS_VISIBLE;
+		DWORD  dwStyle			= WS_OVERLAPPEDWINDOW | WS_VISIBLE;
+		DWORD  dwRestoreStyle	= dwStyle;
 
-		uInt32 adjustedWidth  = 0;
-		uInt32 adjustedHeight = 0;
-		int32  adjustedPosX   = 0;
-		int32  adjustedPosY   = 0;
+		uInt32 adjustedWidth	= 0;
+		uInt32 adjustedHeight	= 0;
+		int32  adjustedPosX		= 0;
+		int32  adjustedPosY		= 0;
 
 		if (!(info.hints & WINDOW_FULLSCREEN))
 		{
 			if (info.hints & WINDOW_BORDERLESS)
-				dwStyle = WS_POPUPWINDOW | WS_VISIBLE;
+			{
+				dwStyle	= WS_POPUPWINDOW | WS_VISIBLE;
+			}
 			if (info.hints & WINDOW_NO_RESIZE)
-				dwStyle &= ~(WS_THICKFRAME | WS_MAXIMIZEBOX);
+			{
+				dwStyle			&= ~(WS_THICKFRAME | WS_MAXIMIZEBOX);
+				dwRestoreStyle	&= ~(WS_THICKFRAME | WS_MAXIMIZEBOX);
+			}
 			if (info.hints & WINDOW_INVISIBLE)
-				dwStyle &= ~WS_VISIBLE;
+			{
+				dwRestoreStyle	&= ~WS_VISIBLE;
+				dwRestoreStyle	&= ~WS_VISIBLE;
+			}
 
 			LONG posX	= info.posX;
 			LONG posY	= info.posY;
@@ -71,38 +80,6 @@ namespace Quartz
 			return nullptr;
 		}
 
-		Surface* pSurface = nullptr;
-		
-		switch (surfaceInfo.surfaceApi)
-		{
-			case SURFACE_API_OPENGL:
-			{
-#ifdef QUARTZAPP_GLEW
-				pSurface = WinApiHelper::CreateWinApiGLFWGLSurface();
-#else
-				printf("Error creating Windows GL Window: GLEW is not available.");
-#endif
-				break;
-			}
-
-			case SURFACE_API_VULKAN:
-			{
-
-#ifdef QUARTZAPP_VULKAN
-				pSurface = WinApiHelper::CreateWinApiVulkanSurface(mInstance, hwnd, surfaceInfo);
-#else
-				printf("Error creating Windows Vulkan Window: Vulkan is not available.");
-#endif
-				break;
-			}
-		}
-
-		if (!pSurface)
-		{
-			::DestroyWindow(hwnd);
-			return nullptr;
-		}
-
 		// Set fullscreen last so as to not flash if something goes wrong.
 		if (info.hints & WINDOW_FULLSCREEN)
 		{
@@ -112,7 +89,16 @@ namespace Quartz
 			}
 		}
 
-		WinApiWindow* pWindow = new WinApiWindow(this, pSurface, hwnd);
+		Surface* pSurface = WinApiHelper::CreateSurface(mInstance, hwnd, surfaceInfo);;
+		
+		if ((surfaceInfo.surfaceApi != SURFACE_API_NONE) && !pSurface)
+		{
+			printf("Error creating WinApi Window: Surface generation failed.\n");
+			::DestroyWindow(hwnd);
+			return nullptr;
+		}
+
+		WinApiWindow* pWindow = new WinApiWindow(this, nullptr, dwRestoreStyle, hwnd);
 
 		WinApiHelper::SetWindowOpenState(pWindow, true);
 
@@ -125,6 +111,8 @@ namespace Quartz
 
 	void WinApiApplication::DestroyWindow(Window* pWindow)
 	{
+		delete pWindow->GetSurface(); // TODO
+		delete pWindow;
 	}
 
 	bool WinApiApplication::IsRawInputAvailable() const
@@ -176,6 +164,16 @@ namespace Quartz
 	void* WinApiApplication::GetNativeHandle()
 	{
 		return &mWndClass; // TODO: probably just null
+	}
+
+	HINSTANCE WinApiApplication::GetInstance() const
+	{
+		return mInstance;
+	}
+
+	WNDCLASSA WinApiApplication::GetWndClass() const
+	{
+		return mWndClass;
 	}
 
 	LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)

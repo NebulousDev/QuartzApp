@@ -43,6 +43,8 @@ namespace Quartz
 		virtual bool RequestClose() = 0;
 		virtual void Close() = 0;
 
+		virtual bool RecreateSurface(const SurfaceInfo& info) = 0;
+
 		virtual bool SetTitle(const String& title) = 0;
 		virtual bool Resize(uSize width, uSize height) = 0;
 		virtual bool Resize(const Vec2u size) = 0;
@@ -80,10 +82,6 @@ namespace Quartz
 		virtual bool IsNoResizeAvailable() const = 0;
 		virtual bool IsNoResize() const = 0;
 		virtual bool SetNoResize(bool noResize) = 0;
-
-		virtual bool IsTopmostAvailable() const = 0;
-		virtual bool IsTopmost() const = 0;
-		virtual bool SetTopmost(bool topmost) = 0;
 
 		virtual bool IsInvisibleAvailable() const = 0;
 		virtual bool IsInvisible() const = 0;

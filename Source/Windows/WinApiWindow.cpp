@@ -1,13 +1,15 @@
 #include "WinApiWindow.h"
 
+#include "WinApiApplication.h"
 #include "WinApiHelper.h"
 
 namespace Quartz
 {
-	WinApiWindow::WinApiWindow(Application* pParentApp, Surface* pSurface, HWND hwnd) :
+	WinApiWindow::WinApiWindow(Application* pParentApp, Surface* pSurface, DWORD dwRestoreStyle, HWND hwnd) :
 		Window(pParentApp, pSurface),
 		mHwnd(hwnd),
-		mOpen(false) { }
+		mOpen(false),
+		mRestoreStyle(dwRestoreStyle) { }
 
 	bool WinApiWindow::RequestClose()
 	{
@@ -18,6 +20,49 @@ namespace Quartz
 	void WinApiWindow::Close()
 	{
 		// TODO: Implment
+	}
+
+	bool WinApiWindow::RecreateSurface(const SurfaceInfo& info)
+	{
+		WinApiApplication* pWinApiApp = static_cast<WinApiApplication*>(mpParent);
+		HINSTANCE hInstance = pWinApiApp->GetInstance();
+
+		if (mpSurface)
+		{
+			delete mpSurface;
+		}
+
+		switch (info.surfaceApi)
+		{
+			case SURFACE_API_NONE:
+			{
+				mpSurface = nullptr;
+				return true;
+			}
+
+			case SURFACE_API_OPENGL:
+			{
+#ifdef QUARTZAPP_GLEW
+				mpSurface = WinApiHelper::CreateWinApiGLFWGLSurface();
+#else
+				printf("Error creating Windows GL Surface: GLEW is not available.");
+				return false;
+#endif
+				return true;
+			}
+
+			case SURFACE_API_VULKAN:
+			{
+
+#ifdef QUARTZAPP_VULKAN
+				mpSurface = WinApiHelper::CreateWinApiVulkanSurface(hInstance, mHwnd, info);
+#else
+				printf("Error creating Windows Vulkan Surface: Vulkan is not available.");
+				return false;
+#endif
+				return true;
+			}
+		}
 	}
 
 	bool WinApiWindow::SetTitle(const String& title)
@@ -237,62 +282,108 @@ namespace Quartz
 
 	bool WinApiWindow::IsBorderlessAvailable() const
 	{
-		return false;
+		return true;
 	}
 
 	bool WinApiWindow::IsBorderless() const
 	{
-		return false;
+		DWORD dwStyle = GetWindowLongA(mHwnd, GWL_STYLE);
+		return dwStyle & WS_POPUPWINDOW;
 	}
 
 	bool WinApiWindow::SetBorderless(bool borderless)
 	{
-		return false;
+		DWORD dwStyle = GetWindowLongA(mHwnd, GWL_STYLE);
+
+		if (borderless == (dwStyle & WS_POPUPWINDOW))
+		{
+			return true;
+		}
+
+		if (borderless)
+		{
+			SetRestoreStyle(dwStyle);
+			
+			dwStyle &= ~WS_OVERLAPPEDWINDOW;
+			dwStyle |= WS_POPUPWINDOW;
+
+			return SetStyle(dwStyle);
+		}
+		else
+		{
+			RestoreStyle();
+		}
 	}
 
 	bool WinApiWindow::IsNoResizeAvailable() const
 	{
-		return false;
+		return true;
 	}
 
 	bool WinApiWindow::IsNoResize() const
 	{
-		return false;
+		DWORD dwStyle = GetWindowLongA(mHwnd, GWL_STYLE);
+		return !(dwStyle & WS_THICKFRAME);
 	}
 
 	bool WinApiWindow::SetNoResize(bool noResize)
 	{
-		return false;
-	}
+		DWORD dwStyle = GetWindowLongA(mHwnd, GWL_STYLE);
 
-	bool WinApiWindow::IsTopmostAvailable() const
-	{
-		return false;
-	}
+		if(noResize)
+			dwStyle &= ~WS_THICKFRAME;
+		else
+			dwStyle |= WS_THICKFRAME;
 
-	bool WinApiWindow::IsTopmost() const
-	{
-		return false;
-	}
-
-	bool WinApiWindow::SetTopmost(bool topmost)
-	{
-		return false;
+		return SetStyle(dwStyle);
 	}
 
 	bool WinApiWindow::IsInvisibleAvailable() const
 	{
-		return false;
+		return true;
 	}
 
 	bool WinApiWindow::IsInvisible() const
 	{
-		return false;
+		DWORD dwStyle = GetWindowLongA(mHwnd, GWL_STYLE);
+		return ~(dwStyle & WS_VISIBLE);
 	}
 
 	bool WinApiWindow::SetInvisible(bool invisible)
 	{
-		return false;
+		DWORD dwStyle = GetWindowLongA(mHwnd, GWL_STYLE);
+
+		if (invisible)
+			dwStyle &= ~WS_VISIBLE;
+		else
+			dwStyle |= WS_VISIBLE;
+
+		return SetStyle(dwStyle);
+	}
+
+	bool WinApiWindow::SetStyle(DWORD dwStyle)
+	{
+		SetWindowLongA(mHwnd, GWL_STYLE, dwStyle);
+
+		if (!SetWindowPos(
+			mHwnd, 0, 0, 0, 0, 0,
+			SWP_NOMOVE | SWP_NOSIZE |
+			SWP_NOZORDER | SWP_FRAMECHANGED))
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	void WinApiWindow::SetRestoreStyle(DWORD dwStyle)
+	{
+		mRestoreStyle = dwStyle;
+	}
+
+	bool WinApiWindow::RestoreStyle()
+	{
+		return SetStyle(mRestoreStyle);
 	}
 
 	void* WinApiWindow::GetNativeHandle()

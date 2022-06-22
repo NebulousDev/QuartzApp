@@ -26,6 +26,9 @@ namespace Quartz
 		void Update() override;
 
 		void* GetNativeHandle() override;
+
+		HINSTANCE GetInstance() const;
+		WNDCLASSA GetWndClass() const;
 	};
 
 	WinApiApplication* CreateWinApiApplication(const ApplicationInfo& appInfo);

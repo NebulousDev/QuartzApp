@@ -33,6 +33,8 @@ namespace Quartz
 		bool RequestClose() override;
 		void Close() override;
 
+		bool RecreateSurface(const SurfaceInfo& info) override;
+
 		bool SetTitle(const String& title) override;
 		bool Resize(uSize width, uSize height) override;
 		bool Resize(const Vec2u size) override;
@@ -68,10 +70,6 @@ namespace Quartz
 		bool IsNoResizeAvailable() const override;
 		bool IsNoResize() const override;
 		bool SetNoResize(bool noResize) override;
-
-		bool IsTopmostAvailable() const override;
-		bool IsTopmost() const override;
-		bool SetTopmost(bool topmost) override;
 
 		bool IsInvisibleAvailable() const override;
 		bool IsInvisible() const override;

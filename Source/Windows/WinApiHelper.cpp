@@ -12,6 +12,40 @@ namespace Quartz
 
 #ifdef QUARTZAPP_VULKAN
 
+	Surface* WinApiHelper::CreateSurface(HINSTANCE instance, HWND hwnd, const SurfaceInfo& info)
+	{
+		Surface* pSurface = nullptr;
+
+		switch (info.surfaceApi)
+		{
+			case SURFACE_API_NONE:
+			{
+				return pSurface;
+			}
+
+			case SURFACE_API_OPENGL:
+			{
+#ifdef QUARTZAPP_GLEW
+				pSurface = WinApiHelper::CreateWinApiGLFWGLSurface();
+#else
+				printf("Error creating Windows GL Surface: GLEW is not available.");
+#endif
+				return pSurface;
+			}
+
+			case SURFACE_API_VULKAN:
+			{
+
+#ifdef QUARTZAPP_VULKAN
+				pSurface = WinApiHelper::CreateWinApiVulkanSurface(instance, hwnd, info);
+#else
+				printf("Error creating Windows Vulkan Surface: Vulkan is not available.");
+#endif
+				return pSurface;
+			}
+		}
+	}
+
 	GLSurface* WinApiHelper::CreateWinApiGLFWGLSurface()
 	{
 		return nullptr;

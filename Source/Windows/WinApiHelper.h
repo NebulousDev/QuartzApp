@@ -15,10 +15,12 @@
 namespace Quartz
 {
 	class WinApiWindow;
+	class WinApiApplication;
 
 	class WinApiHelper
 	{
 	public:
+		static Surface* CreateSurface(HINSTANCE instance, HWND hwnd, const SurfaceInfo& info);
 
 #ifdef QUARTZAPP_GLEW
 		static GLSurface* CreateWinApiGLFWGLSurface();

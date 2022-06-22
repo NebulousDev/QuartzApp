@@ -11,16 +11,19 @@ namespace Quartz
 		friend class WinApiHelper;
 
 	private:
-		HWND mHwnd;
-		bool mOpen;
-		bool mCloseRequested;
-		bool mFullscreen;
+		HWND	mHwnd;
+		bool	mOpen;
+		bool	mCloseRequested;
+		bool	mFullscreen;
+		DWORD	mRestoreStyle;
 
 	public:
-		WinApiWindow(Application* pParentApp, Surface* pSurface, HWND hwnd);
+		WinApiWindow(Application* pParentApp, Surface* pSurface, DWORD dwRestoreStyle, HWND hwnd);
 
 		bool RequestClose() override;
 		void Close() override;
+
+		bool RecreateSurface(const SurfaceInfo& info) override;
 
 		bool SetTitle(const String& title) override;
 		bool Resize(uSize width, uSize height) override;
@@ -58,13 +61,13 @@ namespace Quartz
 		bool IsNoResize() const override;
 		bool SetNoResize(bool noResize) override;
 
-		bool IsTopmostAvailable() const override;
-		bool IsTopmost() const override;
-		bool SetTopmost(bool topmost) override;
-
 		bool IsInvisibleAvailable() const override;
 		bool IsInvisible() const override;
 		bool SetInvisible(bool invisible) override;
+
+		bool SetStyle(DWORD dwStyle);
+		void SetRestoreStyle(DWORD dwStyle);
+		bool RestoreStyle();
 
 		void* GetNativeHandle() override;
 
