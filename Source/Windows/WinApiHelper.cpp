@@ -1,0 +1,190 @@
+#include "WinApiHelper.h"
+
+#include "WinApiWindow.h"
+#include "Types/Array.h"
+
+#include <Vulkan/vulkan_win32.h>
+#include <Windows.h>
+#include <cstdio>
+
+namespace Quartz
+{
+
+#ifdef QUARTZAPP_VULKAN
+
+	GLSurface* WinApiHelper::CreateWinApiGLFWGLSurface()
+	{
+		return nullptr;
+	}
+
+	VulkanSurface* WinApiHelper::CreateWinApiVulkanSurface(HINSTANCE instance, HWND hwnd, const SurfaceInfo& info)
+	{
+		VkSurfaceKHR				vkSurface;
+		Array<VkSurfaceFormatKHR>	supportedFormats;
+		VkSurfaceCapabilitiesKHR	surfaceCapibilites;
+
+		VkWin32SurfaceCreateInfoKHR win32SurfaceInfo = {};
+		win32SurfaceInfo.sType		= VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+		win32SurfaceInfo.hinstance	= instance;
+		win32SurfaceInfo.hwnd		= hwnd;
+
+		VulkanSurfaceInfo* pVulkanSurfaceInfo = static_cast<VulkanSurfaceInfo*>(info.pApiInfo);
+
+		if (!pVulkanSurfaceInfo)
+		{
+			printf("Error creating Vulkan Surface: SurfaceInfo->pApiInfo is null.\n");
+			return nullptr;
+		}
+
+		VkInstance vkInstance = pVulkanSurfaceInfo->instance;
+		VkResult result = vkCreateWin32SurfaceKHR(vkInstance, &win32SurfaceInfo, nullptr, &vkSurface);
+
+		if (result != VK_SUCCESS)
+		{
+			printf("Error creating Vulkan Surface: vkCreateWin32SurfaceKHR() failed.\n");
+			return nullptr;
+		}
+
+		return new VulkanSurface(vkInstance, vkSurface);
+	}
+
+#endif
+
+	void WinApiHelper::QueryDisplayDevices(Array<DISPLAY_DEVICEW>& devices)
+	{
+		uInt64 devNum = 0;
+		DISPLAY_DEVICEW displayDevice = {};
+
+		displayDevice.cb = sizeof(DISPLAY_DEVICEW);
+
+		while(EnumDisplayDevicesW(NULL, devNum, &displayDevice, NULL))
+		{
+			devices.PushBack(displayDevice);
+			++devNum;
+		}
+	}
+
+	void WinApiHelper::QueryDisplayModes(LPWSTR deviceName, Array<DEVMODEW>& modes)
+	{
+		uInt64 modeNum = 0;
+		DEVMODEW devmode;
+
+		while (EnumDisplaySettingsW(deviceName, modeNum, &devmode))
+		{
+			modes.PushBack(devmode);
+			++modeNum;
+		}
+	}
+
+	bool WinApiHelper::FindDisplayMode(LPWSTR deviceName, const Array<DEVMODEW>& modes, 
+		uSize width, uSize height, uSize refreshRate, DEVMODEW& foundMode)
+	{
+		Array<DEVMODEW> foundModes;
+
+		for (uSize i = 0; i < modes.Size(); i++)
+		{
+			const DEVMODEW& devMode = modes[i];
+
+			// Skip all low-bit modes
+			if (devMode.dmBitsPerPel < 32) continue;
+
+			// Skip all modes not running our refresh rate
+			if (devMode.dmDisplayFrequency != refreshRate) continue;
+
+			// Skip all modes of other sizes than ours
+			if (devMode.dmPelsWidth != width ||
+				devMode.dmPelsHeight != height)
+				continue;
+
+			// Test if this mode will succeed
+			if (ChangeDisplaySettingsExW(deviceName, &const_cast<DEVMODEW&>(devMode), 
+				NULL, CDS_TEST, NULL) != DISP_CHANGE_SUCCESSFUL)
+				continue;
+
+			foundModes.PushBack(devMode);
+		}
+
+		if (foundModes.IsEmpty())
+		{
+			return false;
+		}
+
+		// Use first of remaining modes
+		foundMode = foundModes[0];
+
+		return true;
+	}
+
+	void WinApiHelper::SetWindowOpenState(WinApiWindow* pWindow, bool open)
+	{
+		pWindow->mOpen = open;
+	}
+
+	void WinApiHelper::SetWindowFullscreenState(WinApiWindow* pWindow, bool fullscreen)
+	{
+		pWindow->mFullscreen = fullscreen;
+	}
+
+	bool WinApiHelper::SetDisplayMode(uSize monitor, uSize width, uSize height, uSize refreshRate)
+	{
+		DEVMODEW				devMode;
+		DISPLAY_DEVICEW			displayDevice;
+		LPWSTR					deviceName;
+		Array<DISPLAY_DEVICEW>	allDevices;
+		Array<DEVMODEW>			allDevModes;
+
+		QueryDisplayDevices(allDevices);
+		
+		if (monitor > allDevices.Size())
+		{
+			printf("Failed to set WinApi display mode: Monitor id [%d] not valid.\n", monitor);
+			return false;
+		}
+
+		displayDevice = allDevices[monitor];
+		deviceName = displayDevice.DeviceName;
+
+		QueryDisplayModes(deviceName, allDevModes);
+
+		if (!FindDisplayMode(deviceName, allDevModes, width, height, refreshRate, devMode))
+		{
+			printf("Error setting display mode: No valid mode found for %dx%dx%d.\n", width, height, refreshRate);
+			return false;
+		}
+
+		if (ChangeDisplaySettingsExW(deviceName, &devMode, NULL, CDS_FULLSCREEN, NULL) != DISP_CHANGE_SUCCESSFUL)
+		{
+			printf("Error setting display mode: ChangeDisplaySettingsExW() failed.\n");
+			return false;
+		}
+
+		return true;
+	}
+
+	void WinApiHelper::PrintLastError()
+	{
+		DWORD error = GetLastError();
+
+		LPWSTR pErrorMessage = nullptr;
+
+		FormatMessageW(
+			FORMAT_MESSAGE_ALLOCATE_BUFFER |
+			FORMAT_MESSAGE_FROM_SYSTEM |
+			FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL,
+			error,
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			(LPWSTR)&pErrorMessage,
+			0, NULL);
+
+		if (pErrorMessage == nullptr)
+		{
+			// No error
+			return;
+		}
+
+		wprintf(pErrorMessage);
+
+		LocalFree(pErrorMessage);
+	}
+}

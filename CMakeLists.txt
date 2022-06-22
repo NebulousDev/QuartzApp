@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.20.0)
 option(QUARTZAPP_BUILD_STATIC       "Build as a static library"                     OFF)
 option(QUARTZAPP_EXPOSE_APIS        "Expose enabled APIs to parent project"         ON)
 option(QUARTZAPP_ENABLE_GLFW        "Enable GLFW window creation abilities"         ON)
+option(QUARTZAPP_ENABLE_WINAPI      "Enable WinApi window creation abilities"       ON)
 option(QUARTZAPP_ENABLE_GLEW        "Enable GLEW OpenGL context creation"           ON)
 option(QUARTZAPP_ENABLE_VULKAN      "Enable Vulkan context creation"                ON)
 option(QUARTZAPP_ENABLE_DX12        "Enable DX12 context creation"                  ON)
@@ -32,6 +33,7 @@ if(QUARTZAPP_ENABLE_GLFW)
 
 		set(QUARTZAPP_FOUND_LIBS ${QUARTZAPP_FOUND_LIBS} glfw)
 		set(QUARTZAPP_COMIPLE_DEFINITIONS ${QUARTZAPP_COMIPLE_DEFINITIONS} QUARTZAPP_GLFW)
+		set(QUARTZAPP_GLFW PARENT_SCOPE)
 
 		set(QUARTZAPP_SOURCE_FILES ${QUARTZAPP_SOURCE_FILES}
 			"Source/GLFW/GLFWApplication.cpp"
@@ -49,6 +51,29 @@ else()
 	message("[QuartzApp] GLFW disabled. Skipping configuration.")
 endif()
 
+if(QUARTZAPP_ENABLE_WINAPI)
+
+	if(WIN32)
+
+		set(QUARTZAPP_COMIPLE_DEFINITIONS ${QUARTZAPP_COMIPLE_DEFINITIONS} QUARTZAPP_WINAPI)
+		set(QUARTZAPP_WINAPI PARENT_SCOPE)
+
+		set(QUARTZAPP_SOURCE_FILES ${QUARTZAPP_SOURCE_FILES}
+			"Source/Windows/WinApiApplication.cpp"
+			"Source/Windows/WinApiWindow.cpp"
+			"Source/Windows/WinApiHelper.cpp"
+		)
+
+		message("[QuartzApp] WinApi is available.")
+
+	else()
+		message("[QuartzApp] WinApi not available. Skipping configuration.")
+	endif()
+
+else()
+	message("[QuartzApp] WinApi disabled. Skipping configuration.")
+endif()
+
 if(QUARTZAPP_ENABLE_GLEW)
 
 	find_package(GLEW QUIET)
@@ -57,6 +82,7 @@ if(QUARTZAPP_ENABLE_GLEW)
 
 		set(QUARTZAPP_FOUND_LIBS ${QUARTZAPP_FOUND_LIBS} GLEW::GLEW)
 		set(QUARTZAPP_COMIPLE_DEFINITIONS ${QUARTZAPP_COMIPLE_DEFINITIONS} QUARTZAPP_GLEW)
+		set(QUARTZAPP_GLEW PARENT_SCOPE)
 
 		set(QUARTZAPP_SOURCE_FILES ${QUARTZAPP_SOURCE_FILES}
 			"Source/OpenGL/GLSurface.cpp"
@@ -81,6 +107,7 @@ if(QUARTZAPP_ENABLE_VULKAN)
 
 		set(QUARTZAPP_FOUND_LIBS ${QUARTZAPP_FOUND_LIBS} Vulkan::Vulkan Vulkan::Headers)
 		set(QUARTZAPP_COMIPLE_DEFINITIONS ${QUARTZAPP_COMIPLE_DEFINITIONS} QUARTZAPP_VULKAN)
+		set(QUARTZAPP_VULKAN PARENT_SCOPE)
 
 		set(QUARTZAPP_SOURCE_FILES ${QUARTZAPP_SOURCE_FILES}
 			"Source/Vulkan/VulkanSurface.cpp"
@@ -104,6 +131,7 @@ if(QUARTZAPP_ENABLE_DX12)
 
 		set(QUARTZAPP_FOUND_LIBS ${QUARTZAPP_FOUND_LIBS} Microsoft::DirectX-Guids Microsoft::DirectX-Headers)
 		set(QUARTZAPP_COMIPLE_DEFINITIONS ${QUARTZAPP_COMIPLE_DEFINITIONS} QUARTZAPP_DX12)
+		set(QUARTZAPP_DX12 PARENT_SCOPE)
 
 		message("[QuartzApp] DX12 found: ${directx-headers_DIR}")
 
