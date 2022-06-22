@@ -50,6 +50,8 @@ namespace Quartz
 		sSize GetPosY() const override;
 		Point2i GetPosition() const override;
 		Bounds2i GetBounds() const override;
+		bool IsMaximized() const override;
+		bool IsMinimized() const override;
 
 		bool IsOpen() const override;
 		bool IsClosed() const override;

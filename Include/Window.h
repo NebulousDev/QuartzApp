@@ -16,8 +16,7 @@ namespace Quartz
 		WINDOW_FULLSCREEN	= 0x02,
 		WINDOW_BORDERLESS	= 0x04,
 		WINDOW_NO_RESIZE	= 0x08,
-		WINDOW_TOPMOST		= 0x10,
-		WINDOW_INVISIBLE	= 0x20
+		WINDOW_INVISIBLE	= 0x10
 	};
 
 	typedef flags32 WindowHints;
@@ -61,6 +60,8 @@ namespace Quartz
 		virtual sSize GetPosY() const = 0;
 		virtual Point2i GetPosition() const = 0;
 		virtual Bounds2i GetBounds() const = 0;
+		virtual bool IsMaximized() const = 0;
+		virtual bool IsMinimized() const = 0;
 
 		virtual bool IsOpen() const = 0;
 		virtual bool IsClosed() const = 0;

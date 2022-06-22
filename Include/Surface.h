@@ -8,6 +8,7 @@ namespace Quartz
 {
 	enum SurfaceAPI
 	{
+		SURFACE_API_NONE,
 		SURFACE_API_OPENGL,
 		SURFACE_API_VULKAN,
 		SURFACE_API_DX12,
@@ -15,15 +16,14 @@ namespace Quartz
 
 	struct SurfaceInfo
 	{
-		SurfaceAPI	surfaceApi;
-		bool		requestFullscreen;
-		bool		requestHDR;
-		void*		pApiInfo;
+		SurfaceAPI		surfaceApi;
+		void*			pApiInfo;
 	};
 
 	class QUARTZAPP_API Surface
 	{
 	public:
+		virtual bool IsFullscreen() const = 0;
 		virtual bool IsHDR() const = 0;
 	};
 }

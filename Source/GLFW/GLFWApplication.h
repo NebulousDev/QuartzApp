@@ -12,9 +12,6 @@ namespace Quartz
 	public:
 		GLFWApplication(const ApplicationInfo& appInfo);
 
-		bool Create() override;
-		void Destroy() override;
-
 		Window* CreateWindow(const WindowInfo& info, const SurfaceInfo& surfaceInfo) override;
 		void CloseWindow(Window* pWindow) override;
 		void DestroyWindow(Window* pWindow) override;
@@ -27,4 +24,7 @@ namespace Quartz
 		
 		void* GetNativeHandle() override;
 	};
+
+	GLFWApplication* CreateGLFWApplication(const ApplicationInfo& appInfo);
+	void DestroyGLFWApplication(GLFWApplication* pGLFWApplication);
 }

@@ -15,6 +15,11 @@ namespace Quartz
 		return vkSurface;
 	}
 
+	bool VulkanSurface::IsFullscreen() const
+	{
+		return false;
+	}
+
 	bool VulkanSurface::IsHDR() const
 	{
 		return false;

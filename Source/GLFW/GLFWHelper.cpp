@@ -115,7 +115,7 @@ namespace Quartz
 
 	VulkanSurface* GLFWHelper::CreateGLFWVulkanSurface(GLFWwindow* pGLFWwindow, const SurfaceInfo& info)
 	{
-		VulkanSurfaceApiInfo* pApiInfo = static_cast<VulkanSurfaceApiInfo*>(info.pApiInfo);
+		VulkanSurfaceInfo* pApiInfo = static_cast<VulkanSurfaceInfo*>(info.pApiInfo);
 
 		if (pApiInfo == nullptr)
 		{
@@ -124,7 +124,7 @@ namespace Quartz
 		}
 
 		VkSurfaceKHR vkSurface;
-		VkResult error = glfwCreateWindowSurface(pApiInfo->vkInstance, pGLFWwindow, nullptr, &vkSurface);
+		VkResult error = glfwCreateWindowSurface(pApiInfo->instance, pGLFWwindow, nullptr, &vkSurface);
 
 		if (error)
 		{
@@ -132,7 +132,7 @@ namespace Quartz
 			return nullptr;
 		}
 
-		return new VulkanSurface(pApiInfo->vkInstance, vkSurface);
+		return new VulkanSurface(pApiInfo->instance, vkSurface);
 	}
 
 	void GLFWHelper::DestroyGLFWVulkanSurface(VulkanSurface* pSurface)

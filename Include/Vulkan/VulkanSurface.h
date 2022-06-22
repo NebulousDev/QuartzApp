@@ -6,9 +6,12 @@
 
 namespace Quartz
 {
-	struct VulkanSurfaceApiInfo
+	struct VulkanSurfaceInfo
 	{
-		VkInstance		vkInstance;
+		VkInstance			instance;
+		VkPhysicalDevice	physicalDevice;
+		VkSurfaceFormatKHR	surfaceFormat;
+		bool				exclusiveFullscreen;
 	};
 
 	class VulkanSurface : public Surface
@@ -23,6 +26,7 @@ namespace Quartz
 		VkInstance GetVkInsance();
 		VkSurfaceKHR GetVkSurface();
 
+		bool IsFullscreen() const override;
 		bool IsHDR() const override;
 	};
 }

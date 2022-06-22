@@ -146,6 +146,16 @@ namespace Quartz
 		return Bounds2i(pos, pos + size);
 	}
 
+	bool GLFWWindow::IsMaximized() const
+	{
+		return glfwGetWindowAttrib(mpGLFWwindow, GLFW_MAXIMIZED);
+	}
+
+	bool GLFWWindow::IsMinimized() const
+	{
+		return glfwGetWindowAttrib(mpGLFWwindow, GLFW_ICONIFIED);
+	}
+
 	bool GLFWWindow::IsOpen() const
 	{
 		return mWindowState == GLFW_WINDOW_STATE_OPEN;
@@ -219,7 +229,7 @@ namespace Quartz
 
 	bool GLFWWindow::SetBorderless(bool borderless)
 	{
-		if (borderless == (glfwGetWindowAttrib(mpGLFWwindow, GLFW_DECORATED) == GLFW_TRUE))
+		if (glfwGetWindowAttrib(mpGLFWwindow, GLFW_DECORATED) != borderless)
 		{
 			return true;
 		}
@@ -249,7 +259,7 @@ namespace Quartz
 
 	bool GLFWWindow::SetNoResize(bool noResize)
 	{
-		if (noResize == (glfwGetWindowAttrib(mpGLFWwindow, GLFW_RESIZABLE) == GLFW_TRUE))
+		if (glfwGetWindowAttrib(mpGLFWwindow, GLFW_RESIZABLE) == noResize)
 		{
 			return true;
 		}
@@ -294,7 +304,7 @@ namespace Quartz
 
 	bool GLFWWindow::SetInvisible(bool invisible)
 	{
-		if (invisible == (glfwGetWindowAttrib(mpGLFWwindow, GLFW_VISIBLE) == GLFW_FALSE))
+		if (glfwGetWindowAttrib(mpGLFWwindow, GLFW_VISIBLE) == invisible)
 		{
 			return true;
 		}

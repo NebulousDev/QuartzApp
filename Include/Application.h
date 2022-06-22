@@ -56,9 +56,6 @@ namespace Quartz
 	public:
 		Application(const ApplicationInfo& appInfo);
 
-		virtual bool Create() = 0;
-		virtual void Destroy() = 0;
-
 		virtual Window* CreateWindow(const WindowInfo& info, const SurfaceInfo& surfaceInfo) = 0;
 		virtual void CloseWindow(Window* pWindow) = 0;
 		virtual void DestroyWindow(Window* pWindow) = 0;
@@ -78,6 +75,8 @@ namespace Quartz
 		virtual void Update() = 0;
 
 		virtual void* GetNativeHandle() = 0;
+
+		WindowAPI GetWindowAPI() const;
 	};
 
 	QUARTZAPP_API Application* CreateApplication(const ApplicationInfo& appInfo);

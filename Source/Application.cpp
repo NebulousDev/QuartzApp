@@ -1,5 +1,12 @@
 #include "Application.h"
+
+#ifdef QUARTZAPP_GLFW
 #include "GLFW/GLFWApplication.h"
+#endif
+
+#ifdef QUARTZAPP_WINAPI
+#include "Windows/WinApiApplication.h"
+#endif
 
 namespace Quartz
 {
@@ -7,6 +14,7 @@ namespace Quartz
 		mAppName(appInfo.appName),
 		mVersion(appInfo.version),
 		mWindowAPI(WINDOW_API_NONE),
+		mHints(appInfo.hints),
 		mWindowResizedFunc(nullptr),
 		mWindowMovedFunc(nullptr),
 		mWindowClosedFunc(nullptr),
@@ -51,6 +59,11 @@ namespace Quartz
 		mWindowFocusedFunc = callback;
 	}
 
+	WindowAPI Application::GetWindowAPI() const
+	{
+		return mWindowAPI;
+	}
+
 	Application* CreateApplication(const ApplicationInfo& appInfo)
 	{
 		Application* pApplication = nullptr;
@@ -60,7 +73,7 @@ namespace Quartz
 			case WINDOW_API_GLFW:
 			{
 #ifdef QUARTZAPP_GLFW
-				pApplication = new GLFWApplication(appInfo);
+				pApplication = CreateGLFWApplication(appInfo);
 				break;
 #else
 				printf("Error creating GLFW Application: GLFW is not available.");
@@ -70,8 +83,8 @@ namespace Quartz
 
 			case WINDOW_API_WINAPI:
 			{
-#ifdef QUARTZAPP_GLFW
-				pApplication = new GLFWApplication(appInfo);
+#ifdef QUARTZAPP_WINAPI
+				pApplication = CreateWinApiApplication(appInfo);
 				break;
 #else
 				printf("Error creating WinApi Application: WinApi is not available.");
@@ -81,12 +94,12 @@ namespace Quartz
 
 			default:
 			{
-				printf("Error creating Application: Invalid WindowAPI enum.");
+				printf("Error creating Application: Invalid WindowAPI.");
 				return nullptr;
 			}
 		}
 
-		if (!pApplication->Create())
+		if (!pApplication)
 		{
 			return nullptr;
 		}
@@ -96,8 +109,31 @@ namespace Quartz
 
 	void DestroyApplication(Application* pApp)
 	{
-		pApp->Destroy();
-		delete pApp;
+		switch (pApp->GetWindowAPI())
+		{
+			case WINDOW_API_GLFW:
+			{
+#ifdef QUARTZAPP_GLFW
+				GLFWApplication* pGLFWApplication = static_cast<GLFWApplication*>(pApp);
+				DestroyGLFWApplication(pGLFWApplication);
+				break;
+#endif
+			}
+
+			case WINDOW_API_WINAPI:
+			{
+#ifdef QUARTZAPP_WINAPI
+				WinApiApplication* pWinApiApplication = static_cast<WinApiApplication*>(pApp);
+				DestroyWinApiApplication(pWinApiApplication);
+				break;
+#endif
+			}
+
+			default:
+			{
+				printf("Error destroying Application: Invalid WindowAPI.");
+			}
+		}
 	}
 }
 

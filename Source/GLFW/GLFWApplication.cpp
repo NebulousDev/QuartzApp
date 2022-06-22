@@ -10,39 +10,6 @@ namespace Quartz
 	GLFWApplication::GLFWApplication(const ApplicationInfo& appInfo)
 		: Application(appInfo) { }
 
-	bool GLFWApplication::Create()
-	{
-		if (!GLFWHelper::IsGLFWInitialized())
-		{
-			if (!GLFWHelper::InitializeGLFW())
-			{
-				return false;
-			}
-		}
-
-		GLFWHelper::RegisterApp(this);
-
-		return true;
-	}
-
-	void GLFWApplication::Destroy()
-	{
-		// Intentional copy so as to not remove elements from the itterator live
-		Array<GLFWWindow*> appWindows = GLFWHelper::GetWindows(this);
-
-		for (GLFWWindow* pWindow : appWindows)
-		{
-			DestroyWindow(pWindow);
-		}
-
-		GLFWHelper::UnregisterApp(this);
-
-		if (GLFWHelper::AppCount() == 0)
-		{
-			glfwTerminate();
-		}
-	}
-
 	Window* GLFWApplication::CreateWindow(const WindowInfo& info, const SurfaceInfo& surfaceInfo)
 	{
 		GLFWwindow* pGLFWwindow	= nullptr;
@@ -99,14 +66,9 @@ namespace Quartz
 #ifdef QUARTZAPP_GLEW
 				pSurface = GLFWHelper::CreateGLFWGLSurface();
 #else
-				printf("Error creating GLFW Vulkan Window: Vulkan is not available.");
+				printf("Error creating GLFW GL Window: GLEW is not available.");
 				return nullptr;
 #endif
-				if (!pSurface)
-				{
-					return nullptr;
-				}
-
 				break;
 			} 
 
@@ -116,16 +78,16 @@ namespace Quartz
 #ifdef QUARTZAPP_VULKAN
 				pSurface = GLFWHelper::CreateGLFWVulkanSurface(pGLFWwindow, surfaceInfo);
 #else
-				printf("Error creating GLFW GL Window: GLEW is not available.");
+				printf("Error creating GLFW Vulkan Window: Vulkan is not available.");
 				return nullptr;
 #endif
-				if (!pSurface)
-				{
-					return nullptr;
-				}
-
 				break;
 			}
+		}
+
+		if (!pSurface)
+		{
+			return nullptr;
 		}
 
 		pWindow = new GLFWWindow(this, pGLFWwindow, info.title, pSurface);
@@ -228,6 +190,43 @@ namespace Quartz
 	{
 		// GLFW does not have a native application handle
 		return nullptr;
+	}
+
+	GLFWApplication* CreateGLFWApplication(const ApplicationInfo& appInfo)
+	{
+		if (!GLFWHelper::IsGLFWInitialized())
+		{
+			if (!GLFWHelper::InitializeGLFW())
+			{
+				return nullptr;
+			}
+		}
+
+		GLFWApplication* pApplication = new GLFWApplication(appInfo);
+
+		GLFWHelper::RegisterApp(pApplication);
+
+		return pApplication;
+	}
+
+	void DestroyGLFWApplication(GLFWApplication* pGLFWApplication)
+	{
+		// Intentional copy so as to not remove elements from the itterator live
+		Array<GLFWWindow*> appWindows = GLFWHelper::GetWindows(pGLFWApplication);
+
+		for (GLFWWindow* pWindow : appWindows)
+		{
+			pGLFWApplication->DestroyWindow(pWindow);
+		}
+
+		GLFWHelper::UnregisterApp(pGLFWApplication);
+
+		if (GLFWHelper::AppCount() == 0)
+		{
+			glfwTerminate();
+		}
+
+		delete pGLFWApplication;
 	}
 }
 
