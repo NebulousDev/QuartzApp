@@ -8,6 +8,7 @@ namespace Quartz
 	{
 	public:
 		friend class GLFWHelper;
+		friend class GLFWRegistry;
 
 	public:
 		GLFWApplication(const ApplicationInfo& appInfo);

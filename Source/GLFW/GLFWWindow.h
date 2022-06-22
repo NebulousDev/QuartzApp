@@ -15,7 +15,6 @@ namespace Quartz
 		GLFW_WINDOW_STATE_OPEN
 	};
 
-
 	class GLFWWindow : public Window
 	{
 	public:

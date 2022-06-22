@@ -28,7 +28,7 @@ namespace Quartz
 #ifdef QUARTZAPP_GLEW
 				pSurface = WinApiHelper::CreateWinApiGLFWGLSurface();
 #else
-				printf("Error creating Windows GL Surface: GLEW is not available.");
+				printf("Error creating Windows GL Surface: GLEW is not available.\n");
 #endif
 				return pSurface;
 			}
@@ -39,9 +39,15 @@ namespace Quartz
 #ifdef QUARTZAPP_VULKAN
 				pSurface = WinApiHelper::CreateWinApiVulkanSurface(instance, hwnd, info);
 #else
-				printf("Error creating Windows Vulkan Surface: Vulkan is not available.");
+				printf("Error creating Windows Vulkan Surface: Vulkan is not available.\n");
 #endif
 				return pSurface;
+			}
+
+			default:
+			{
+				printf("Error creating Surface: Invalid SurfaceAPI enum.\n");
+				return nullptr;
 			}
 		}
 	}

@@ -39,6 +39,8 @@ if(QUARTZAPP_ENABLE_GLFW)
 			"Source/GLFW/GLFWApplication.cpp"
 			"Source/GLFW/GLFWWindow.cpp"
 			"Source/GLFW/GLFWHelper.cpp"
+			"Source/GLFW/GLFWRegistry.cpp"
+			"Source/GLFW/GLFWCallbacks.cpp"
 		)
 
 		message("[QuartzApp] GLFW found: ${glfw3_DIR}")
@@ -62,6 +64,7 @@ if(QUARTZAPP_ENABLE_WINAPI)
 			"Source/Windows/WinApiApplication.cpp"
 			"Source/Windows/WinApiWindow.cpp"
 			"Source/Windows/WinApiHelper.cpp"
+			"Source/Windows/WinApiRegistry.cpp"
 		)
 
 		message("[QuartzApp] WinApi is available.")

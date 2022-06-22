@@ -27,42 +27,17 @@ namespace Quartz
 		WinApiApplication* pWinApiApp = static_cast<WinApiApplication*>(mpParent);
 		HINSTANCE hInstance = pWinApiApp->GetInstance();
 
-		if (mpSurface)
+		Surface* pNewSurface = WinApiHelper::CreateSurface(hInstance, mHwnd, info);
+
+		if (!pNewSurface && (info.surfaceApi != SURFACE_API_NONE))
 		{
-			delete mpSurface;
+			printf("Error creating new Surface: CreateSurface() failed. Using existing...\n");
+			return false;
 		}
 
-		switch (info.surfaceApi)
-		{
-			case SURFACE_API_NONE:
-			{
-				mpSurface = nullptr;
-				return true;
-			}
+		delete mpSurface; // TODO: Add more logic here
 
-			case SURFACE_API_OPENGL:
-			{
-#ifdef QUARTZAPP_GLEW
-				mpSurface = WinApiHelper::CreateWinApiGLFWGLSurface();
-#else
-				printf("Error creating Windows GL Surface: GLEW is not available.");
-				return false;
-#endif
-				return true;
-			}
-
-			case SURFACE_API_VULKAN:
-			{
-
-#ifdef QUARTZAPP_VULKAN
-				mpSurface = WinApiHelper::CreateWinApiVulkanSurface(hInstance, mHwnd, info);
-#else
-				printf("Error creating Windows Vulkan Surface: Vulkan is not available.");
-				return false;
-#endif
-				return true;
-			}
-		}
+		mpSurface = pNewSurface;
 	}
 
 	bool WinApiWindow::SetTitle(const String& title)
@@ -311,7 +286,7 @@ namespace Quartz
 		}
 		else
 		{
-			RestoreStyle();
+			return RestoreStyle();
 		}
 	}
 

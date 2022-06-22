@@ -5,6 +5,7 @@
 #include "Types/Array.h"
 
 #include "GLFWWindow.h"
+#include "GLFWCallbacks.h"
 
 #ifdef QUARTZAPP_GLEW
 #include "OpenGL/GLSurface.h"
@@ -14,16 +15,6 @@
 #include "Vulkan/VulkanSurface.h"
 #endif
 
-struct GLFWwindow;
-
-void GLFWWindowSizeCallback(GLFWwindow* pGLFWwindow, int width, int height);
-void GLFWWindowPosCallback(GLFWwindow* pGLFWwindow, int posX, int posY);
-void GLFWWindowClosedCallback(GLFWwindow* pGLFWwindow);
-bool GLFWWindowCloseRequestedCallback(GLFWwindow* pGLFWwindow);
-void GLFWWindowMaximizedCallback(GLFWwindow* pGLFWwindow, int maximized);
-void GLFWWindowMinimzedCallback(GLFWwindow* pGLFWwindow, int minimized);
-void GLFWWindowFocusedCallback(GLFWwindow* pGLFWwindow, int focused);
-
 namespace Quartz
 {
 	class GLFWApplication;
@@ -32,27 +23,19 @@ namespace Quartz
 	class GLFWHelper
 	{
 	private:
-		static uSize smAppCount;
-		static Map<handle64, Array<GLFWWindow*>> smRegistry;
 		static bool smInitialzed;
-
-		friend void ::GLFWWindowSizeCallback(GLFWwindow* pGLFWwindow, int width, int height);
-		friend void ::GLFWWindowPosCallback(GLFWwindow * pGLFWwindow, int posX, int posY);
-		friend bool ::GLFWWindowCloseRequestedCallback(GLFWwindow* pGLFWwindow);
-		friend void ::GLFWWindowClosedCallback(GLFWwindow* pGLFWwindow);
-		friend void ::GLFWWindowMaximizedCallback(GLFWwindow* pGLFWwindow, int mazimized);
-		friend void ::GLFWWindowMinimzedCallback(GLFWwindow* pGLFWwindow, int minimized);
-		friend void ::GLFWWindowFocusedCallback(GLFWwindow* pGLFWwindow, int focused);
 
 	public:
 		static bool InitializeGLFW();
 		static bool IsGLFWInitialized();
 
-		static void RegisterApp(const GLFWApplication* pApp);
-		static void UnregisterApp(const GLFWApplication* pApp);
-
-		static void RegisterAppWindow(const GLFWApplication* pApp, GLFWWindow* pWindow);
-		static void UnregisterAppWindow(const GLFWApplication* pApp, GLFWWindow* pWindow);
+		friend void ::GLFWWindowSizeCallback(GLFWwindow* pGLFWwindow, int width, int height);
+		friend void ::GLFWWindowPosCallback(GLFWwindow* pGLFWwindow, int posX, int posY);
+		friend bool ::GLFWWindowCloseRequestedCallback(GLFWwindow* pGLFWwindow);
+		friend void ::GLFWWindowClosedCallback(GLFWwindow* pGLFWwindow);
+		friend void ::GLFWWindowMaximizedCallback(GLFWwindow* pGLFWwindow, int mazimized);
+		friend void ::GLFWWindowMinimzedCallback(GLFWwindow* pGLFWwindow, int minimized);
+		friend void ::GLFWWindowFocusedCallback(GLFWwindow* pGLFWwindow, int focused);
 
 		static void SetWindowState(GLFWWindow* pWindow, GLFWWindowState state);
 
@@ -88,8 +71,5 @@ namespace Quartz
 			GLFWWindow* pWindow, int focused);
 
 		static void PrintError();
-
-		static Array<GLFWWindow*>& GetWindows(const GLFWApplication* pApp);
-		static uSize AppCount();
 	};
 }

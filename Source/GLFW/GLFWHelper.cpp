@@ -9,9 +9,7 @@
 
 namespace Quartz
 {
-	bool								GLFWHelper::smInitialzed = false;
-	uSize								GLFWHelper::smAppCount = 0;
-	Map<handle64, Array<GLFWWindow*>>	GLFWHelper::smRegistry;
+	bool GLFWHelper::smInitialzed = false;
 
 	bool GLFWHelper::InitializeGLFW()
 	{
@@ -35,61 +33,6 @@ namespace Quartz
 	bool GLFWHelper::IsGLFWInitialized()
 	{
 		return smInitialzed;
-	}
-
-	void GLFWHelper::RegisterApp(const GLFWApplication* pApp)
-	{
-		smAppCount++;
-
-		handle64 handle = reinterpret_cast<handle64>(pApp);
-
-		// Construct blank entry
-		smRegistry.Put(handle);
-	}
-
-	void GLFWHelper::UnregisterApp(const GLFWApplication* pApp)
-	{
-		handle64 handle = reinterpret_cast<handle64>(pApp);
-
-		smAppCount--;
-
-		if (smAppCount == 0)
-		{
-			smRegistry.Remove(handle);
-		}
-	}
-
-	void GLFWHelper::RegisterAppWindow(const GLFWApplication* pApp, GLFWWindow* pWindow)
-	{
-		handle64 handle = reinterpret_cast<handle64>(pApp);
-
-		glfwSetWindowSizeCallback(pWindow->mpGLFWwindow, GLFWWindowSizeCallback);
-		glfwSetWindowPosCallback(pWindow->mpGLFWwindow, GLFWWindowPosCallback);
-		glfwSetWindowMaximizeCallback(pWindow->mpGLFWwindow, GLFWWindowMaximizedCallback);
-		glfwSetWindowIconifyCallback(pWindow->mpGLFWwindow, GLFWWindowMinimzedCallback);
-		glfwSetWindowFocusCallback(pWindow->mpGLFWwindow, GLFWWindowFocusedCallback);
-
-		// Assure app is registered
-		assert(smRegistry.Contains(handle));
-		
-		smRegistry[handle].PushBack(pWindow);
-	}
-
-	void GLFWHelper::UnregisterAppWindow(const GLFWApplication* pApp, GLFWWindow* pWindow)
-	{
-		handle64 handle = reinterpret_cast<handle64>(pApp);
-		Map<handle64, Array<GLFWWindow*>>::Iterator appItr = smRegistry.Find(handle);
-
-		if (appItr != smRegistry.End())
-		{
-			Array<GLFWWindow*>& windows = appItr->value;
-			auto windowItr = windows.Find(pWindow);
-
-			if (windowItr != windows.End())
-			{
-				windows.Remove(windowItr);
-			}
-		}
 	}
 
 	void GLFWHelper::SetWindowState(GLFWWindow* pWindow, GLFWWindowState state)
@@ -151,7 +94,7 @@ namespace Quartz
 
 	void GLFWHelper::CallWindowPosCallback(GLFWApplication* pApplication, GLFWWindow* pWindow, int posX, int posY)
 	{
-		if(pApplication->mWindowMovedFunc)
+		if (pApplication->mWindowMovedFunc)
 			pApplication->mWindowMovedFunc(pWindow, (uSize)posX, (uSize)posY);
 	}
 
@@ -194,89 +137,4 @@ namespace Quartz
 		int error = glfwGetError(&glfwError);
 		printf("GLFW fatal error: [%d]\n%s\n", error, glfwError);
 	}
-
-	Array<GLFWWindow*>& GLFWHelper::GetWindows(const GLFWApplication* pApp)
-	{
-		handle64 handle = reinterpret_cast<handle64>(pApp);
-
-		// Assure the application is valid, otherwise a false entry will be created.
-		assert(smRegistry.Contains(handle));
-
-		return smRegistry[handle];
-	}
-
-	uSize GLFWHelper::AppCount()
-	{
-		return smAppCount;
-	}
-}
-
-void GLFWWindowSizeCallback(GLFWwindow* pGLFWwindow, int width, int height)
-{
-	using namespace Quartz;
-
-	GLFWWindow* pWindow = (GLFWWindow*)glfwGetWindowUserPointer(pGLFWwindow);
-	GLFWApplication* pApp = (GLFWApplication*)pWindow->GetParentApplication();
-
-	GLFWHelper::CallWindowSizeCallback(pApp, pWindow, width, height);
-}
-
-void GLFWWindowPosCallback(GLFWwindow* pGLFWwindow, int posX, int posY)
-{
-	using namespace Quartz;
-
-	GLFWWindow* pWindow = (GLFWWindow*)glfwGetWindowUserPointer(pGLFWwindow);
-	GLFWApplication* pApp = (GLFWApplication*)pWindow->GetParentApplication();
-
-	GLFWHelper::CallWindowPosCallback(pApp, pWindow, posX, posY);
-}
-
-void GLFWWindowClosedCallback(GLFWwindow* pGLFWwindow)
-{
-	using namespace Quartz;
-
-	GLFWWindow* pWindow = (GLFWWindow*)glfwGetWindowUserPointer(pGLFWwindow);
-	GLFWApplication* pApp = (GLFWApplication*)pWindow->GetParentApplication();
-
-	GLFWHelper::CallWindowClosedCallback(pApp, pWindow);
-}
-
-bool GLFWWindowCloseRequestedCallback(GLFWwindow* pGLFWwindow)
-{
-	using namespace Quartz;
-
-	GLFWWindow* pWindow = (GLFWWindow*)glfwGetWindowUserPointer(pGLFWwindow);
-	GLFWApplication* pApp = (GLFWApplication*)pWindow->GetParentApplication();
-
-	return GLFWHelper::CallWindowCloseRequestedCallback(pApp, pWindow);
-}
-
-void GLFWWindowMaximizedCallback(GLFWwindow* pGLFWwindow, int maximized)
-{
-	using namespace Quartz;
-
-	GLFWWindow* pWindow = (GLFWWindow*)glfwGetWindowUserPointer(pGLFWwindow);
-	GLFWApplication* pApp = (GLFWApplication*)pWindow->GetParentApplication();
-
-	GLFWHelper::CallWindowMaximizedCallback(pApp, pWindow, maximized);
-}
-
-void GLFWWindowMinimzedCallback(GLFWwindow* pGLFWwindow, int minimized)
-{
-	using namespace Quartz;
-
-	GLFWWindow* pWindow = (GLFWWindow*)glfwGetWindowUserPointer(pGLFWwindow);
-	GLFWApplication* pApp = (GLFWApplication*)pWindow->GetParentApplication();
-
-	GLFWHelper::CallWindowMinimizedCallback(pApp, pWindow, minimized);
-}
-
-void GLFWWindowFocusedCallback(GLFWwindow* pGLFWwindow, int focused)
-{
-	using namespace Quartz;
-
-	GLFWWindow* pWindow = (GLFWWindow*)glfwGetWindowUserPointer(pGLFWwindow);
-	GLFWApplication* pApp = (GLFWApplication*)pWindow->GetParentApplication();
-
-	GLFWHelper::CallWindowFocusedCallback(pApp, pWindow, focused);
 }

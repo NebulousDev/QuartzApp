@@ -3,6 +3,7 @@
 #include "Types/Types.h"
 #include "WinApiHelper.h"
 #include "WinApiWindow.h"
+#include "WinApiRegistry.h"
 #include "WinApi.h"
 
 namespace Quartz
@@ -364,11 +365,25 @@ namespace Quartz
 			return nullptr;
 		}
 
-		return new WinApiApplication(appInfo, hInstance, wndClass);
+		WinApiApplication* pApplication = new WinApiApplication(appInfo, hInstance, wndClass);
+
+		WinApiRegistry::RegisterApp(pApplication);
+
+		return pApplication;
 	}
 
 	void DestroyWinApiApplication(WinApiApplication* pWinApiApplication)
 	{
+		// Intentional copy so as to not remove elements from the itterator live
+		Array<WinApiWindow*> appWindows = WinApiRegistry::GetWindows(pWinApiApplication);
 
+		for (WinApiWindow* pWindow : appWindows)
+		{
+			pWinApiApplication->DestroyWindow(pWindow);
+		}
+
+		WinApiRegistry::UnregisterApp(pWinApiApplication);
+
+		delete pWinApiApplication;
 	}
 }

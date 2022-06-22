@@ -15,7 +15,6 @@
 namespace Quartz
 {
 	class WinApiWindow;
-	class WinApiApplication;
 
 	class WinApiHelper
 	{

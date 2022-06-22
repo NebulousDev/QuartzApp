@@ -234,7 +234,7 @@ namespace Quartz
 
 	bool GLFWWindow::SetBorderless(bool borderless)
 	{
-		if (glfwGetWindowAttrib(mpGLFWwindow, GLFW_DECORATED) != borderless)
+		if (glfwGetWindowAttrib(mpGLFWwindow, GLFW_DECORATED) != (int)borderless)
 		{
 			return true;
 		}
@@ -264,7 +264,7 @@ namespace Quartz
 
 	bool GLFWWindow::SetNoResize(bool noResize)
 	{
-		if (glfwGetWindowAttrib(mpGLFWwindow, GLFW_RESIZABLE) == noResize)
+		if (glfwGetWindowAttrib(mpGLFWwindow, GLFW_RESIZABLE) == (int)noResize)
 		{
 			return true;
 		}
@@ -294,7 +294,7 @@ namespace Quartz
 
 	bool GLFWWindow::SetInvisible(bool invisible)
 	{
-		if (glfwGetWindowAttrib(mpGLFWwindow, GLFW_VISIBLE) == invisible)
+		if (glfwGetWindowAttrib(mpGLFWwindow, GLFW_VISIBLE) == (int)invisible)
 		{
 			return true;
 		}

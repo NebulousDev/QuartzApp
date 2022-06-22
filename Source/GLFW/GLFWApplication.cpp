@@ -1,6 +1,7 @@
 #include "GLFWApplication.h"
 
 #include "GLFWWindow.h"
+#include "GLFWRegistry.h"
 #include "GLFWHelper.h"
 #include <GLFW/glfw3.h>
 #include <cstdio>
@@ -109,7 +110,7 @@ namespace Quartz
 
 		glfwSetWindowUserPointer(pGLFWwindow, (void*)pWindow);
 
-		GLFWHelper::RegisterAppWindow(this, pWindow);
+		GLFWRegistry::RegisterAppWindow(this, pWindow);
 		GLFWHelper::SetWindowState(pWindow, GLFW_WINDOW_STATE_OPEN);
 
 		return static_cast<Window*>(pWindow);
@@ -135,7 +136,7 @@ namespace Quartz
 		GLFWWindow* pGLFWWindow = static_cast<GLFWWindow*>(pWindow);
 
 		CloseWindow(pWindow);
-		GLFWHelper::UnregisterAppWindow(this, pGLFWWindow);
+		GLFWRegistry::UnregisterAppWindow(this, pGLFWWindow);
 
 		delete pGLFWWindow;
 	}
@@ -160,7 +161,7 @@ namespace Quartz
 		// Note that this will be called for every Application which calls Update()
 		glfwPollEvents();
 
-		for (GLFWWindow* pWindow : GLFWHelper::GetWindows(this))
+		for (GLFWWindow* pWindow : GLFWRegistry::GetWindows(this))
 		{
 			if (pWindow->IsOpen()) // Dont update closed but non-destroyed windows
 			{
@@ -204,7 +205,7 @@ namespace Quartz
 
 		GLFWApplication* pApplication = new GLFWApplication(appInfo);
 
-		GLFWHelper::RegisterApp(pApplication);
+		GLFWRegistry::RegisterApp(pApplication);
 
 		return pApplication;
 	}
@@ -212,16 +213,16 @@ namespace Quartz
 	void DestroyGLFWApplication(GLFWApplication* pGLFWApplication)
 	{
 		// Intentional copy so as to not remove elements from the itterator live
-		Array<GLFWWindow*> appWindows = GLFWHelper::GetWindows(pGLFWApplication);
+		Array<GLFWWindow*> appWindows = GLFWRegistry::GetWindows(pGLFWApplication);
 
 		for (GLFWWindow* pWindow : appWindows)
 		{
 			pGLFWApplication->DestroyWindow(pWindow);
 		}
 
-		GLFWHelper::UnregisterApp(pGLFWApplication);
+		GLFWRegistry::UnregisterApp(pGLFWApplication);
 
-		if (GLFWHelper::AppCount() == 0)
+		if (GLFWRegistry::AppCount() == 0)
 		{
 			glfwTerminate();
 		}
