@@ -16,59 +16,44 @@ namespace Quartz
 
 	Window* WinApiApplication::CreateWindow(const WindowInfo& info, const SurfaceInfo& surfaceInfo)
 	{
-		DWORD  dwStyle			= WS_OVERLAPPEDWINDOW | WS_VISIBLE;
-		DWORD  dwRestoreStyle	= dwStyle;
+		DWORD       dwStyle      = 0;
+		WindowStyle restoreStyle = {};
 
-		uInt32 adjustedWidth	= 0;
-		uInt32 adjustedHeight	= 0;
-		int32  adjustedPosX		= 0;
-		int32  adjustedPosY		= 0;
+		dwStyle = WS_OVERLAPPEDWINDOW;
 
-		if (!(info.hints & WINDOW_FULLSCREEN))
+		if (info.hints & WINDOW_BORDERLESS)
 		{
-			if (info.hints & WINDOW_BORDERLESS)
-			{
-				dwStyle	= WS_POPUPWINDOW | WS_VISIBLE;
-			}
-			if (info.hints & WINDOW_NO_RESIZE)
-			{
-				dwStyle			&= ~(WS_THICKFRAME | WS_MAXIMIZEBOX);
-				dwRestoreStyle	&= ~(WS_THICKFRAME | WS_MAXIMIZEBOX);
-			}
-			if (info.hints & WINDOW_INVISIBLE)
-			{
-				dwRestoreStyle	&= ~WS_VISIBLE;
-				dwRestoreStyle	&= ~WS_VISIBLE;
-			}
-
-			LONG posX	= info.posX;
-			LONG posY	= info.posY;
-			LONG width	= info.width;
-			LONG height	= info.height;
-
-			RECT windowSize =
-			{ 
-				posX, posY,
-				posX + width,
-				posY + height
-			};
-
-			AdjustWindowRect(&windowSize, dwStyle, FALSE);
-
-			adjustedWidth  = windowSize.right  - windowSize.left;
-			adjustedHeight = windowSize.bottom - windowSize.top;
-			adjustedPosX   = windowSize.left;
-			adjustedPosY   = windowSize.top;
+			dwStyle = WS_POPUPWINDOW;
+			restoreStyle.borderless = true;
 		}
-		else
+		if (info.hints & WINDOW_NO_RESIZE)
 		{
-			dwStyle = WS_POPUPWINDOW | WS_VISIBLE;
-
-			adjustedWidth	= info.width;
-			adjustedHeight	= info.height;
-			adjustedPosX	= 0;
-			adjustedPosY	= 0;
+			dwStyle &= ~(WS_THICKFRAME | WS_MAXIMIZEBOX);
+			restoreStyle.noResize = true;
 		}
+		if (info.hints & WINDOW_INVISIBLE)
+		{
+			restoreStyle.invisible = true;
+		}
+
+		LONG posX	= info.posX;
+		LONG posY	= info.posY;
+		LONG width	= info.width;
+		LONG height	= info.height;
+
+		RECT windowSize =
+		{
+			posX, posY,
+			posX + width,
+			posY + height
+		};
+
+		AdjustWindowRect(&windowSize, dwStyle, FALSE);
+
+		uInt32 adjustedWidth	= windowSize.right - windowSize.left;
+		uInt32 adjustedHeight	= windowSize.bottom - windowSize.top;
+		int32  adjustedPosX		= windowSize.left;
+		int32  adjustedPosY		= windowSize.top;
 
 		HWND hwnd = CreateWindowExA(0, TEXT(mAppName.Str()), TEXT(info.title.Str()),
 			dwStyle, adjustedPosX, adjustedPosY, adjustedWidth, adjustedHeight,
@@ -81,15 +66,6 @@ namespace Quartz
 			return nullptr;
 		}
 
-		// Set fullscreen last so as to not flash if something goes wrong.
-		if (info.hints & WINDOW_FULLSCREEN)
-		{
-			if (!WinApiHelper::SetDisplayMode(0, info.width, info.height, 165))
-			{
-				printf("Warning while setting WinApi Window to fullscreen mode: SetDisplayMode() failed.\n");
-			}
-		}
-
 		Surface* pSurface = WinApiHelper::CreateSurface(mInstance, hwnd, surfaceInfo);;
 		
 		if ((surfaceInfo.surfaceApi != SURFACE_API_NONE) && !pSurface)
@@ -99,9 +75,29 @@ namespace Quartz
 			return nullptr;
 		}
 
-		WinApiWindow* pWindow = new WinApiWindow(this, nullptr, dwRestoreStyle, hwnd);
+		WinApiWindow* pWindow = new WinApiWindow(this, pSurface, restoreStyle, hwnd);
 
-		WinApiHelper::SetWindowOpenState(pWindow, true);
+		SetLastError(0);
+		SetWindowLongPtrA(hwnd, GWLP_USERDATA, (LONG_PTR)pWindow);
+		if (GetLastError())
+		{
+			printf("Warning while setting WinApi Window user data: SetWindowLongA() failed.\n");
+			WinApiHelper::PrintLastError();
+		}
+
+		// Set fullscreen last so as to not flash if something goes wrong.
+		if (info.hints & WINDOW_FULLSCREEN)
+		{
+			if (!pWindow->SetFullscreen(true))
+			{
+				printf("Warning while setting WinApi Window to fullscreen mode: SetDisplayMode() failed.\n");
+			}
+		}
+
+		if (!(info.hints & WINDOW_INVISIBLE))
+		{
+			ShowWindow(hwnd, SW_SHOW);
+		}
 
 		return pWindow;
 	}
@@ -179,176 +175,111 @@ namespace Quartz
 
 	LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
-		//WinApiApplication* pApp = (WinApiApplication*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-		//Engine* pEngine = Engine::GetInstance();
-		//
-		//if (pApp != nullptr)
-		//{
-		//	Win32Window* pWindow = pApp->mHWNDMap[reinterpret_cast<Handle64>(hwnd)];
-		//
-		//	if (pWindow != nullptr)
-		//	{
-		//		switch (uMsg)
-		//		{
-		//		case WM_DEVICECHANGE:
-		//		{
-		//			if (wParam == DBT_DEVNODES_CHANGED)
-		//			{
-		//				pEngine->GetPlatform()->GetPeripheralController()->RescanPeripherals();
-		//			}
-		//
-		//			break;
-		//		}
-		//
-		//		case WM_KILLFOCUS:
-		//		{
-		//			/*
-		//			if (pApp->mWindowFocusCallback)
-		//			{
-		//				pWindow->focused = false;
-		//				pApp->mWindowFocusCallback(pWindow, false);
-		//			}
-		//
-		//			if (pApp->mCapturingWindow)
-		//			{
-		//				pApp->ReleaseCursor();
-		//			}
-		//			*/
-		//
-		//			break;
-		//		}
-		//
-		//		case WM_SETFOCUS:
-		//		{
-		//			/*
-		//			if (pApp->mWindowFocusCallback)
-		//			{
-		//				pWindow->focused = true;
-		//				pApp->mWindowFocusCallback(pWindow, true);
-		//			}
-		//			*/
-		//
-		//			break;
-		//		}
-		//
-		//		case WM_MOUSEMOVE:
-		//		{
-		//			/*
-		//			if (!pWindow->mouseInside)
-		//			{
-		//				if (pApp->mWindowMouseEnteredCallback)
-		//				{
-		//					pWindow->mouseInside = true;
-		//					pApp->mWindowMouseEnteredCallback(pWindow, true);
-		//				}
-		//			}
-		//			*/
-		//
-		//			break;
-		//		}
-		//
-		//		case WM_MOUSELEAVE:
-		//		{
-		//			/*
-		//			if (pApp->mWindowMouseEnteredCallback)
-		//			{
-		//				pWindow->mouseInside = false;
-		//				pApp->mWindowMouseEnteredCallback(pWindow, false);
-		//			}
-		//			*/
-		//
-		//			break;
-		//		}
-		//
-		//		case WM_SIZE:
-		//		{
-		//			/*
-		//			uInt32 x = LOWORD(lParam);
-		//			uInt32 y = HIWORD(lParam);
-		//
-		//			RECT rect, clientRect;
-		//			GetWindowRect(hwnd, &rect);
-		//			GetClientRect(hwnd, &clientRect);
-		//			ClientToScreen(hwnd, reinterpret_cast<POINT*>(&clientRect.left));
-		//			ClientToScreen(hwnd, reinterpret_cast<POINT*>(&clientRect.right));
-		//
-		//			Bounds2i bounds(rect.left, rect.top, rect.right, rect.bottom);
-		//			Bounds2i clientBounds(clientRect.left, clientRect.top, clientRect.right, clientRect.bottom);
-		//
-		//			pWindow->bounds = bounds;
-		//			pWindow->clientBounds = clientBounds;
-		//
-		//			if (pApp->mWindowResizedCallback)
-		//			{
-		//				pApp->mWindowResizedCallback(pWindow, clientBounds.Width(), clientBounds.Height());
-		//			}
-		//
-		//			if (pApp->mCapturingWindow)
-		//			{
-		//				// @Note: Recapture mouse to reset clipping
-		//				pApp->CaptureCursor(pApp->mCapturingWindow);
-		//			}
-		//			*/
-		//
-		//			break;
-		//		}
-		//		case WM_MOVE:
-		//		{
-		//			/*
-		//			uInt32 x = LOWORD(lParam);
-		//			uInt32 y = HIWORD(lParam);
-		//
-		//			RECT rect, clientRect;
-		//			GetWindowRect(hwnd, &rect);
-		//			GetClientRect(hwnd, &clientRect);
-		//			ClientToScreen(hwnd, reinterpret_cast<POINT*>(&clientRect.left));
-		//			ClientToScreen(hwnd, reinterpret_cast<POINT*>(&clientRect.right));
-		//
-		//			Bounds2i bounds(rect.left, rect.top, rect.right, rect.bottom);
-		//			Bounds2i clientBounds(clientRect.left, clientRect.top, clientRect.right, clientRect.bottom);
-		//
-		//			pWindow->bounds = bounds;
-		//			pWindow->clientBounds = clientBounds;
-		//
-		//			if (pApp->mWindowMovedCallback)
-		//			{
-		//				pApp->mWindowMovedCallback(pWindow, clientBounds.start.x, clientBounds.start.y);
-		//			}
-		//
-		//			if (pApp->mCapturingWindow)
-		//			{
-		//				// @Note: Recapture mouse to reset clipping
-		//				pApp->CaptureCursor(pApp->mCapturingWindow);
-		//			}
-		//			*/
-		//
-		//			break;
-		//		}
-		//		case WM_CLOSE:
-		//		{
-		//			WindowCloseEvent closeEvent;
-		//			closeEvent.pWindow = pWindow;
-		//			pEngine->GetEventSystem()->Publish(closeEvent, EVENT_PRIORITY_IMMEDIATE);
-		//			break;
-		//		}
-		//
-		//		case WM_DESTROY:
-		//		{
-		//			//pApp->ReleaseCursor();
-		//
-		//			break;
-		//		}
-		//		default:
-		//			break;
-		//		}
-		//	}
-		//}
+		WinApiWindow* pWindow = (WinApiWindow*)GetWindowLongPtrA(hwnd, GWLP_USERDATA);
+	
+		if (!pWindow)
+		{
+			return DefWindowProcA(hwnd, uMsg, wParam, lParam);
+		}
+
+		WinApiApplication* pApp = (WinApiApplication*)pWindow->GetParentApplication();
+
+		switch (uMsg)
+		{
+			case WM_SIZE:
+			{
+				if (wParam == SIZE_MINIMIZED)
+				{
+					WinApiHelper::CallWindowMinimizedCallback(pApp, pWindow, true);
+					WinApiHelper::SetWindowLastMinimized(pWindow, true);
+				}
+
+				if (wParam == SIZE_MAXIMIZED)
+				{
+					WinApiHelper::CallWindowMaximizedCallback(pApp, pWindow, true);
+					WinApiHelper::SetWindowLastMaximized(pWindow, true);
+				}
+
+				if (wParam == SIZE_RESTORED)
+				{
+					if (WinApiHelper::GetWindowLastMinimized(pWindow))
+					{
+						WinApiHelper::CallWindowMinimizedCallback(pApp, pWindow, false);
+						WinApiHelper::SetWindowLastMinimized(pWindow, false);
+					}
+
+					if (WinApiHelper::GetWindowLastMaximized(pWindow))
+					{
+						WinApiHelper::CallWindowMaximizedCallback(pApp, pWindow, false);
+						WinApiHelper::SetWindowLastMaximized(pWindow, false);
+
+					}
+
+					UINT width = LOWORD(lParam);
+					UINT height = HIWORD(lParam);
+
+					WinApiHelper::CallWindowSizeCallback(pApp, pWindow, width, height);
+				}
+
+				break;
+			}
+
+			case WM_MOVE:
+			{
+				DWORD posX = LOWORD(lParam);
+				DWORD posY = HIWORD(lParam);
+
+				WinApiHelper::CallWindowPosCallback(pApp, pWindow, posX, posY);
+
+				break;
+			}
+
+			case WM_SETFOCUS:
+			{
+				WinApiHelper::CallWindowFocusedCallback(pApp, pWindow, true);
+
+				if (pWindow->IsFullscreen())
+				{
+					uSize refreshRate = WinApiHelper::GetDefaultMonitorRefreshRate();
+
+					WinApiHelper::SetDisplayMode(0, pWindow->GetWidth(), pWindow->GetHeight(), refreshRate);
+				}
+
+				break;
+			}
+
+			case WM_KILLFOCUS:
+			{
+				WinApiHelper::CallWindowFocusedCallback(pApp, pWindow, false);
+
+				if (pWindow->IsFullscreen())
+				{
+					Vec2u size = WinApiHelper::GetDefaultMonitorSize();
+					uSize refreshRate = WinApiHelper::GetDefaultMonitorRefreshRate();
+
+					WinApiHelper::SetDisplayMode(0, size.x, size.y, refreshRate);
+				}
+
+				break;
+			}
+
+			case WM_DISPLAYCHANGE:
+			{
+				// TODO: set WinApiHelper monitor size etc
+				break;
+			}
+		}
 
 		return DefWindowProcA(hwnd, uMsg, wParam, lParam);
 	}
 
 	WinApiApplication* CreateWinApiApplication(const ApplicationInfo& appInfo)
 	{
+		if (!WinApiHelper::IsWinApiInitialized())
+		{
+			WinApiHelper::InitializeWinApi();
+		}
+
 		HINSTANCE hInstance = GetModuleHandle(NULL);
 
 		WNDCLASSA wndClass = {};

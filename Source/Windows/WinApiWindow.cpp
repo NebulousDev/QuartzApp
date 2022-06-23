@@ -5,11 +5,14 @@
 
 namespace Quartz
 {
-	WinApiWindow::WinApiWindow(Application* pParentApp, Surface* pSurface, DWORD dwRestoreStyle, HWND hwnd) :
+	WinApiWindow::WinApiWindow(Application* pParentApp, Surface* pSurface, const WindowStyle& restoreStyle, HWND hwnd) :
 		Window(pParentApp, pSurface),
 		mHwnd(hwnd),
-		mOpen(false),
-		mRestoreStyle(dwRestoreStyle) { }
+		mOpen(true),
+		mFullscreen(false),
+		mLastMinimized(false),
+		mLastMaximized(false),
+		mRestoreStyle(restoreStyle) { }
 
 	bool WinApiWindow::RequestClose()
 	{
@@ -159,7 +162,7 @@ namespace Quartz
 	{
 		RECT rect;
 		GetClientRect(mHwnd, &rect);
-		return rect.top - rect.bottom;
+		return rect.bottom - rect.top;
 	}
 
 	Vec2i WinApiWindow::GetSize() const
@@ -251,8 +254,44 @@ namespace Quartz
 
 	bool WinApiWindow::SetFullscreen(bool fullscreen)
 	{
-		Vec2i size = GetSize();
-		return WinApiHelper::SetDisplayMode(0, size.x, size.y, 165);
+		if(fullscreen == mFullscreen)
+		{
+			return true;
+		}
+
+		if (!mFullscreen)
+		{
+			Vec2i size = GetSize();
+			uSize refreshRate = WinApiHelper::GetDefaultMonitorRefreshRate();
+
+			if (!WinApiHelper::SetDisplayMode(0, size.x, size.y, refreshRate))
+			{
+				return false;
+			}
+
+			mRestorePos = GetPosition();
+			Move(0, 0); // Error check?
+
+			mFullscreen = true;
+
+			return true;
+		}
+		else
+		{
+			Vec2u size = WinApiHelper::GetDefaultMonitorSize();
+			uSize refreshRate = WinApiHelper::GetDefaultMonitorRefreshRate();
+
+			if (!WinApiHelper::SetDisplayMode(0, size.x, size.y, refreshRate))
+			{
+				return false;
+			}
+
+			Move(mRestorePos); // Error check?
+
+			mFullscreen = false;
+
+			return true;
+		}
 	}
 
 	bool WinApiWindow::IsBorderlessAvailable() const
@@ -262,30 +301,32 @@ namespace Quartz
 
 	bool WinApiWindow::IsBorderless() const
 	{
-		DWORD dwStyle = GetWindowLongA(mHwnd, GWL_STYLE);
+		DWORD dwStyle = GetDWORDStyle();
 		return dwStyle & WS_POPUPWINDOW;
 	}
 
 	bool WinApiWindow::SetBorderless(bool borderless)
 	{
-		DWORD dwStyle = GetWindowLongA(mHwnd, GWL_STYLE);
-
-		if (borderless == (dwStyle & WS_POPUPWINDOW))
-		{
-			return true;
-		}
+		DWORD dwStyle = GetDWORDStyle();
 
 		if (borderless)
 		{
-			SetRestoreStyle(dwStyle);
-			
 			dwStyle &= ~WS_OVERLAPPEDWINDOW;
 			dwStyle |= WS_POPUPWINDOW;
 
-			return SetStyle(dwStyle);
+			mRestoreStyle.borderless = true;
+
+			if (!SetDWORDStyle(dwStyle))
+			{
+				mRestoreStyle.borderless = false;
+				return false;
+			}
+
+			return true;
 		}
 		else
 		{
+			mRestoreStyle.borderless = false;
 			return RestoreStyle();
 		}
 	}
@@ -297,20 +338,32 @@ namespace Quartz
 
 	bool WinApiWindow::IsNoResize() const
 	{
-		DWORD dwStyle = GetWindowLongA(mHwnd, GWL_STYLE);
+		DWORD dwStyle = GetDWORDStyle();
 		return !(dwStyle & WS_THICKFRAME);
 	}
 
 	bool WinApiWindow::SetNoResize(bool noResize)
 	{
-		DWORD dwStyle = GetWindowLongA(mHwnd, GWL_STYLE);
+		DWORD dwStyle = GetDWORDStyle();
 
-		if(noResize)
+		if (noResize)
+		{
 			dwStyle &= ~WS_THICKFRAME;
+			mRestoreStyle.noResize = true;
+		}
 		else
+		{
 			dwStyle |= WS_THICKFRAME;
+			mRestoreStyle.noResize = false;
+		}
 
-		return SetStyle(dwStyle);
+		if (!SetDWORDStyle(dwStyle))
+		{
+			mRestoreStyle.noResize = false;
+			return false;
+		}
+
+		return true;
 	}
 
 	bool WinApiWindow::IsInvisibleAvailable() const
@@ -320,23 +373,60 @@ namespace Quartz
 
 	bool WinApiWindow::IsInvisible() const
 	{
-		DWORD dwStyle = GetWindowLongA(mHwnd, GWL_STYLE);
+		DWORD dwStyle = GetDWORDStyle();
 		return ~(dwStyle & WS_VISIBLE);
 	}
 
 	bool WinApiWindow::SetInvisible(bool invisible)
 	{
-		DWORD dwStyle = GetWindowLongA(mHwnd, GWL_STYLE);
+		DWORD dwStyle = GetDWORDStyle();
 
 		if (invisible)
+		{
 			dwStyle &= ~WS_VISIBLE;
+			mRestoreStyle.invisible = true;
+		}
 		else
+		{
 			dwStyle |= WS_VISIBLE;
+			mRestoreStyle.invisible = false;
+		}
 
-		return SetStyle(dwStyle);
+		if (!SetDWORDStyle(dwStyle))
+		{
+			mRestoreStyle.invisible = false;
+			return false;
+		}
+
+		return true;
 	}
 
-	bool WinApiWindow::SetStyle(DWORD dwStyle)
+	DWORD WinApiWindow::GetDWORDStyle() const
+	{
+		return GetWindowLongA(mHwnd, GWL_STYLE);
+	}
+
+	DWORD WinApiWindow::GetDWORDStyle(const WindowStyle& state) const
+	{
+		DWORD dwStyle = WS_OVERLAPPEDWINDOW | WS_VISIBLE;
+
+		if (state.borderless)
+		{
+			dwStyle = WS_POPUPWINDOW | WS_VISIBLE;
+		}
+		if (state.noResize)
+		{
+			dwStyle &= ~(WS_THICKFRAME | WS_MAXIMIZEBOX);
+		}
+		if (state.invisible)
+		{
+			dwStyle &= ~WS_VISIBLE;
+		}
+
+		return dwStyle;
+	}
+
+	bool WinApiWindow::SetDWORDStyle(DWORD dwStyle)
 	{
 		SetWindowLongA(mHwnd, GWL_STYLE, dwStyle);
 
@@ -351,14 +441,30 @@ namespace Quartz
 		return true;
 	}
 
-	void WinApiWindow::SetRestoreStyle(DWORD dwStyle)
+	bool WinApiWindow::SetStyle(const WindowStyle& style)
 	{
-		mRestoreStyle = dwStyle;
+		DWORD dwStyle = GetDWORDStyle(style);
+		return SetDWORDStyle(dwStyle);
+	}
+
+	void WinApiWindow::SetRestoreStyle(const WindowStyle& state)
+	{
+		mRestoreStyle = state;
 	}
 
 	bool WinApiWindow::RestoreStyle()
 	{
 		return SetStyle(mRestoreStyle);
+	}
+
+	WindowStyle WinApiWindow::GetRestoreStyle() const
+	{
+		return mRestoreStyle;
+	}
+
+	Point2i WinApiWindow::GetRestorePos() const
+	{
+		return mRestorePos;
 	}
 
 	void* WinApiWindow::GetNativeHandle()

@@ -1,5 +1,6 @@
 #include "WinApiHelper.h"
 
+#include "WinApiApplication.h"
 #include "WinApiWindow.h"
 #include "Types/Array.h"
 
@@ -9,8 +10,23 @@
 
 namespace Quartz
 {
+	bool  WinApiHelper::smInitialized = false;
+	Vec2u WinApiHelper::smMonitorSize = {0,0};
+	uSize WinApiHelper::smMonitorRefreshRate = 0;
 
 #ifdef QUARTZAPP_VULKAN
+
+	void WinApiHelper::InitializeWinApi()
+	{
+		smMonitorSize = GetCurrentMonitorSize();
+		smMonitorRefreshRate = GetCurrentMonitorRefreshRate();
+		smInitialized = true;
+	}
+
+	bool WinApiHelper::IsWinApiInitialized()
+	{
+		return smInitialized;
+	}
 
 	Surface* WinApiHelper::CreateSurface(HINSTANCE instance, HWND hwnd, const SurfaceInfo& info)
 	{
@@ -155,6 +171,43 @@ namespace Quartz
 		return true;
 	}
 
+	Vec2u WinApiHelper::GetCurrentMonitorSize()
+	{
+		uSize width = GetSystemMetrics(SM_CXSCREEN);
+		uSize height = GetSystemMetrics(SM_CYSCREEN);
+
+		return Vec2u(width, height);
+	}
+
+	uSize WinApiHelper::GetCurrentMonitorRefreshRate()
+	{
+		DEVMODEA devmode = {};
+		uSize refreshRate = 60; // default to 60hz
+
+		if (EnumDisplaySettingsA(NULL, ENUM_CURRENT_SETTINGS, &devmode))
+		{
+			refreshRate = devmode.dmDisplayFrequency;
+		}
+
+		return refreshRate;
+	}
+
+	void WinApiHelper::SetDefaultMonitorInfo(Vec2u size, uSize refreshRate)
+	{
+		smMonitorSize = size;
+		smMonitorRefreshRate = refreshRate;
+	}
+
+	Vec2u WinApiHelper::GetDefaultMonitorSize()
+	{
+		return smMonitorSize;
+	}
+
+	uSize WinApiHelper::GetDefaultMonitorRefreshRate()
+	{
+		return smMonitorRefreshRate;
+	}
+
 	void WinApiHelper::SetWindowOpenState(WinApiWindow* pWindow, bool open)
 	{
 		pWindow->mOpen = open;
@@ -163,6 +216,26 @@ namespace Quartz
 	void WinApiHelper::SetWindowFullscreenState(WinApiWindow* pWindow, bool fullscreen)
 	{
 		pWindow->mFullscreen = fullscreen;
+	}
+
+	bool WinApiHelper::GetWindowLastMinimized(WinApiWindow* pWindow)
+	{
+		return pWindow->mLastMinimized;
+	}
+
+	void WinApiHelper::SetWindowLastMinimized(WinApiWindow* pWindow, bool lastMinimized)
+	{
+		pWindow->mLastMinimized = lastMinimized;
+	}
+
+	bool WinApiHelper::GetWindowLastMaximized(WinApiWindow* pWindow)
+	{
+		return pWindow->mLastMaximized;
+	}
+
+	void WinApiHelper::SetWindowLastMaximized(WinApiWindow* pWindow, bool lastMaximized)
+	{
+		pWindow->mLastMaximized = lastMaximized;
 	}
 
 	bool WinApiHelper::SetDisplayMode(uSize monitor, uSize width, uSize height, uSize refreshRate)
@@ -199,6 +272,50 @@ namespace Quartz
 		}
 
 		return true;
+	}
+
+	void WinApiHelper::CallWindowSizeCallback(WinApiApplication* pApplication, WinApiWindow* pWindow, int width, int height)
+	{
+		if (pApplication->mWindowResizedFunc)
+			pApplication->mWindowResizedFunc(pWindow, (uSize)width, (uSize)height);
+	}
+
+	void WinApiHelper::CallWindowPosCallback(WinApiApplication* pApplication, WinApiWindow* pWindow, int posX, int posY)
+	{
+		if (pApplication->mWindowMovedFunc)
+			pApplication->mWindowMovedFunc(pWindow, (uSize)posX, (uSize)posY);
+	}
+
+	bool WinApiHelper::CallWindowCloseRequestedCallback(WinApiApplication* pApplication, WinApiWindow* pWindow)
+	{
+		if (pApplication->mWindowCloseRequestedFunc)
+			return pApplication->mWindowCloseRequestedFunc(pWindow);
+
+		return true;
+	}
+
+	void WinApiHelper::CallWindowClosedCallback(WinApiApplication* pApplication, WinApiWindow* pWindow)
+	{
+		if (pApplication->mWindowClosedFunc)
+			pApplication->mWindowClosedFunc(pWindow);
+	}
+
+	void WinApiHelper::CallWindowMaximizedCallback(WinApiApplication* pApplication, WinApiWindow* pWindow, int maximized)
+	{
+		if (pApplication->mWindowMaximizedFunc)
+			pApplication->mWindowMaximizedFunc(pWindow, !(bool)maximized);
+	}
+
+	void WinApiHelper::CallWindowMinimizedCallback(WinApiApplication* pApplication, WinApiWindow* pWindow, int minimized)
+	{
+		if (pApplication->mWindowMinimizedFunc)
+			pApplication->mWindowMinimizedFunc(pWindow, !(bool)minimized);
+	}
+
+	void WinApiHelper::CallWindowFocusedCallback(WinApiApplication* pApplication, WinApiWindow* pWindow, int focused)
+	{
+		if (pApplication->mWindowFocusedFunc)
+			pApplication->mWindowFocusedFunc(pWindow, !(bool)focused);
 	}
 
 	void WinApiHelper::PrintLastError()

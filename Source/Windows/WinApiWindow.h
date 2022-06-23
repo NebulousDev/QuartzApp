@@ -2,23 +2,39 @@
 
 #include "Window.h"
 #include "WinApi.h"
+#include "Math/Point.h"
 
 namespace Quartz
 {
+	struct WindowStyle
+	{
+		bool borderless;
+		bool noResize;
+		bool invisible;
+	};
+
 	class WinApiWindow : public Window
 	{
 	public:
 		friend class WinApiHelper;
 
 	private:
-		HWND	mHwnd;
-		bool	mOpen;
-		bool	mCloseRequested;
-		bool	mFullscreen;
-		DWORD	mRestoreStyle;
+		HWND mHwnd;
+
+		bool mOpen;
+		bool mCloseRequested;
+
+		bool mFullscreen;
+
+		bool mLastMinimized;
+		bool mLastMaximized;
+
+		WindowStyle mRestoreStyle;
+		Point2i		mRestorePos;
 
 	public:
-		WinApiWindow(Application* pParentApp, Surface* pSurface, DWORD dwRestoreStyle, HWND hwnd);
+		WinApiWindow(Application* pParentApp, Surface* pSurface, 
+			const WindowStyle& restoreStyle, HWND hwnd);
 
 		bool RequestClose() override;
 		void Close() override;
@@ -65,10 +81,17 @@ namespace Quartz
 		bool IsInvisible() const override;
 		bool SetInvisible(bool invisible) override;
 
-		bool SetStyle(DWORD dwStyle);
-		void SetRestoreStyle(DWORD dwStyle);
+		DWORD GetDWORDStyle() const;
+		DWORD GetDWORDStyle(const WindowStyle& style) const;
+		bool SetDWORDStyle(DWORD dwStyle);
+
+		bool SetStyle(const WindowStyle& style);
+
+		void SetRestoreStyle(const WindowStyle& style);
 		bool RestoreStyle();
 
+		WindowStyle GetRestoreStyle() const;
+		Point2i GetRestorePos() const;
 		void* GetNativeHandle() override;
 
 		HWND GetHWND();

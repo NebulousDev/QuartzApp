@@ -7,6 +7,9 @@ namespace Quartz
 {
 	class WinApiApplication : public Application
 	{
+	public:
+		friend class WinApiHelper;
+
 	private:
 		HINSTANCE	mInstance;
 		WNDCLASSA	mWndClass;
