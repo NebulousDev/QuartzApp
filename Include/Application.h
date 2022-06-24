@@ -16,7 +16,7 @@ namespace Quartz
 	typedef void(*WindowFocusedCallbackFunc)(Window* pWindow, bool lost);
 
 	typedef void(*WindowKeyCallbackFunc)(Window* pWindow, uInt16 scancode, bool down, bool repeat);
-	typedef void(*WindowKeyTypedCallbackFunc)(Window* pWindow, char character, uInt16 scancode, bool repeat);
+	typedef void(*WindowKeyTypedCallbackFunc)(Window* pWindow, char character, bool repeat);
 
 	enum WindowAPI
 	{

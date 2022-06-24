@@ -2,6 +2,7 @@
 
 #include "WinApi.h"
 #include "Types/Array.h"
+#include "Types/Map.h"
 #include "Math/Vector.h"
 
 #ifdef QUARTZAPP_GLEW
@@ -29,6 +30,7 @@ namespace Quartz
 		static bool  smInitialized;
 		static Vec2u smMonitorSize;
 		static uSize smMonitorRefreshRate;
+		static Map<int, uSize> smRepeatCounts;
 
 	public:
 		static void InitializeWinApi();
@@ -67,6 +69,9 @@ namespace Quartz
 
 		static bool SetDisplayMode(uSize monitor, uSize width, uSize height, uSize refreshRate);
 
+		static uSize GetKeyRepeatCount(int scancode);
+		static void SetKeyRepeatCount(int scancode, uSize count);
+
 		static void CallWindowSizeCallback(WinApiApplication* pApplication,
 			WinApiWindow* pWindow, int width, int height);
 
@@ -92,7 +97,7 @@ namespace Quartz
 			WinApiWindow* pWindow, uInt16 scancode, bool down, bool repeat);
 
 		static void CallWindowKeyTypedCallback(WinApiApplication* pApplication,
-			WinApiWindow* pWindow, char character, uInt16 scancode, bool repeat);
+			WinApiWindow* pWindow, char character, bool repeat);
 
 		static void PrintLastError();
 	};

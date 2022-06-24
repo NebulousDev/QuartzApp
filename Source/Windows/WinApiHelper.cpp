@@ -13,6 +13,7 @@ namespace Quartz
 	bool  WinApiHelper::smInitialized = false;
 	Vec2u WinApiHelper::smMonitorSize = {0,0};
 	uSize WinApiHelper::smMonitorRefreshRate = 0;
+	Map<int, uSize> WinApiHelper::smRepeatCounts;
 
 #ifdef QUARTZAPP_VULKAN
 
@@ -274,6 +275,17 @@ namespace Quartz
 		return true;
 	}
 
+	uSize WinApiHelper::GetKeyRepeatCount(int scancode)
+	{
+		// TODO: Look into unknown values being possibly not zero
+		return smRepeatCounts[scancode];
+	}
+
+	void WinApiHelper::SetKeyRepeatCount(int scancode, uSize count)
+	{
+		smRepeatCounts[scancode] = count;
+	}
+
 	void WinApiHelper::CallWindowSizeCallback(WinApiApplication* pApplication, WinApiWindow* pWindow, int width, int height)
 	{
 		if (pApplication->mWindowResizedFunc)
@@ -324,10 +336,10 @@ namespace Quartz
 			pApplication->mWindowKeyFunc(pWindow, scancode, down, repeat);
 	}
 
-	void WinApiHelper::CallWindowKeyTypedCallback(WinApiApplication* pApplication, WinApiWindow* pWindow, char character, uInt16 scancode, bool repeat)
+	void WinApiHelper::CallWindowKeyTypedCallback(WinApiApplication* pApplication, WinApiWindow* pWindow, char character, bool repeat)
 	{
 		if (pApplication->mWindowKeyTypedFunc)
-			pApplication->mWindowKeyTypedFunc(pWindow, character, scancode, repeat);
+			pApplication->mWindowKeyTypedFunc(pWindow, character, repeat);
 	}
 
 	void WinApiHelper::PrintLastError()
