@@ -124,8 +124,10 @@ namespace Quartz
 			pGLFWWindow->GetGLFWHandle() &&
 			pGLFWWindow->IsOpen())
 		{
-			GLFWHelper::CallWindowClosedCallback(this, pGLFWWindow);
 			GLFWHelper::SetWindowState(pGLFWWindow, GLFW_WINDOW_STATE_CLOSED);
+			GLFWHelper::CallWindowClosedCallback(this, pGLFWWindow);
+
+			GLFWRegistry::UnregisterAppWindow(this, pGLFWWindow);
 
 			glfwDestroyWindow(pGLFWWindow->GetGLFWHandle());
 		}
@@ -134,10 +136,7 @@ namespace Quartz
 	void GLFWApplication::DestroyWindow(Window* pWindow)
 	{
 		GLFWWindow* pGLFWWindow = static_cast<GLFWWindow*>(pWindow);
-
-		CloseWindow(pWindow);
-		GLFWRegistry::UnregisterAppWindow(this, pGLFWWindow);
-
+		CloseWindow(pGLFWWindow);
 		delete pGLFWWindow;
 	}
 
