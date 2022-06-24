@@ -11,7 +11,7 @@ option(QUARTZAPP_GENERATE_CONFIGS   "Enable generation of QuartzAppConfig.cmake"
 
 set(QUARTZAPP_INCLUDE_PREFIX "Quartz" CACHE STRING "Include prefix for installed headers")
 
-project(QuartzApp VERSION 1.0.0)
+project(QuartzApp VERSION 1.1.0)
 
 include(GNUInstallDirs)
 
