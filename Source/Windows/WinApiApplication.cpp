@@ -209,6 +209,7 @@ namespace Quartz
 		switch (uMsg)
 		{
 			case WM_KEYDOWN:
+			case WM_SYSKEYDOWN:
 			{
 				uInt16 scancode = (uInt8)(lParam >> 16);
 				int repeatCount = WinApiHelper::GetKeyRepeatCount(scancode);
@@ -228,10 +229,11 @@ namespace Quartz
 					}
 				}
 
-				return 0;
+				break;
 			}
 
 			case WM_KEYUP:
+			case WM_SYSKEYUP:
 			{
 				uInt16 scancode = (uInt8)(lParam >> 16);
 
@@ -249,10 +251,11 @@ namespace Quartz
 					}
 				}
 
-				return 0;
+				break;
 			}
 
 			case WM_CHAR:
+			case WM_SYSCHAR:
 			{
 				char character = (char)wParam;
 				uInt16 scancode = (uInt8)(lParam >> 16);
@@ -270,7 +273,7 @@ namespace Quartz
 					WinApiHelper::CallWindowKeyTypedCallback(pApp, pWindow, character, repeatCount > 1);
 				}
 
-				return 0;
+				break;
 			}
 
 			case WM_CLOSE:
