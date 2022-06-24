@@ -318,6 +318,18 @@ namespace Quartz
 			pApplication->mWindowFocusedFunc(pWindow, !(bool)focused);
 	}
 
+	void WinApiHelper::CallWindowKeyCallback(WinApiApplication* pApplication, WinApiWindow* pWindow, uInt16 scancode, bool down, bool repeat)
+	{
+		if (pApplication->mWindowKeyFunc)
+			pApplication->mWindowKeyFunc(pWindow, scancode, down, repeat);
+	}
+
+	void WinApiHelper::CallWindowKeyTypedCallback(WinApiApplication* pApplication, WinApiWindow* pWindow, char character, uInt16 scancode, bool repeat)
+	{
+		if (pApplication->mWindowKeyTypedFunc)
+			pApplication->mWindowKeyTypedFunc(pWindow, character, scancode, repeat);
+	}
+
 	void WinApiHelper::PrintLastError()
 	{
 		DWORD error = GetLastError();

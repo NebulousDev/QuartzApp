@@ -144,6 +144,7 @@ namespace Quartz
 	{
 		MSG msg = {};
 
+		/*
 		// Process and remove all messages before WM_INPUT
 		while (PeekMessageW(&msg, NULL, 0, WM_INPUT - 1, PM_REMOVE))
 		{
@@ -169,6 +170,14 @@ namespace Quartz
 				DispatchMessageW(&msg);
 			}
 		}
+		*/
+
+		while (PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessageA(&msg);
+		}
+
 	}
 
 	void* WinApiApplication::GetNativeHandle()
@@ -199,6 +208,37 @@ namespace Quartz
 
 		switch (uMsg)
 		{
+			case WM_KEYDOWN:
+			{
+				bool repeated = (uInt16)lParam > 1;
+				uInt16 scancode = (uInt8)(lParam >> 16);
+
+				WinApiHelper::CallWindowKeyCallback(pApp, pWindow, scancode, true, repeated);
+				
+				return 0;
+			}
+
+			case WM_KEYUP:
+			{
+				bool repeated = (uInt16)lParam > 1;
+				uInt16 scancode = (uInt8)(lParam >> 16);
+
+				WinApiHelper::CallWindowKeyCallback(pApp, pWindow, scancode, false, repeated);
+				
+				return 0;
+			}
+
+			case WM_CHAR:
+			{
+				bool repeated = ((uInt16)lParam) > 1;
+				char character = (char)wParam;
+				uInt16 scancode = (uInt8)(lParam >> 16);
+
+				WinApiHelper::CallWindowKeyTypedCallback(pApp, pWindow, character, scancode, repeated);
+
+				return 0;
+			}
+
 			case WM_CLOSE:
 			{
 				if (lParam == WINAPI_CLOSE_REQUEST_PARAM)
