@@ -16,7 +16,14 @@ namespace Quartz
 
 	bool WinApiWindow::RequestClose()
 	{
-		// TODO: Implement
+		WinApiApplication* pWinApiApp = static_cast<WinApiApplication*>(mpParent);
+
+		if (WinApiHelper::CallWindowCloseRequestedCallback(pWinApiApp, this))
+		{
+			PostMessageA(mHwnd, WM_CLOSE, 0, WINAPI_CLOSE_REQUEST_PARAM);
+			return true;
+		}
+
 		return false;
 	}
 

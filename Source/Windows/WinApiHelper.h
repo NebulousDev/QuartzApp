@@ -18,6 +18,11 @@ namespace Quartz
 	class WinApiApplication;
 	class WinApiWindow;
 
+	enum
+	{
+		WINAPI_CLOSE_REQUEST_PARAM = -1
+	};
+
 	class WinApiHelper
 	{
 	private:

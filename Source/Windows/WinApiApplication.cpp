@@ -104,11 +104,24 @@ namespace Quartz
 
 	void WinApiApplication::CloseWindow(Window* pWindow)
 	{
+		WinApiWindow* pWinApiWindow = static_cast<WinApiWindow*>(pWindow);
+
+		if (pWinApiWindow && pWinApiWindow->IsOpen())
+		{
+			delete pWinApiWindow->GetSurface(); // TODO
+
+			WinApiHelper::SetWindowOpenState(pWinApiWindow, false);
+			WinApiHelper::CallWindowClosedCallback(this, pWinApiWindow);
+
+			WinApiRegistry::UnregisterAppWindow(this, pWinApiWindow);
+		
+			::DestroyWindow(pWinApiWindow->GetHWND());
+		}
 	}
 
 	void WinApiApplication::DestroyWindow(Window* pWindow)
 	{
-		delete pWindow->GetSurface(); // TODO
+		CloseWindow(pWindow);
 		delete pWindow;
 	}
 
@@ -186,6 +199,23 @@ namespace Quartz
 
 		switch (uMsg)
 		{
+			case WM_CLOSE:
+			{
+				if (lParam == WINAPI_CLOSE_REQUEST_PARAM)
+				{
+					pApp->CloseWindow(pWindow);
+				}
+				else
+				{
+					if (WinApiHelper::CallWindowCloseRequestedCallback(pApp, pWindow))
+					{
+						pApp->CloseWindow(pWindow);
+					}
+				}
+
+				return 0;
+			}
+
 			case WM_SIZE:
 			{
 				if (wParam == SIZE_MINIMIZED)
