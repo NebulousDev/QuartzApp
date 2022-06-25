@@ -43,6 +43,8 @@ namespace Quartz
 		glfwSetWindowMaximizeCallback(pWindow->GetGLFWHandle(), GLFWWindowMaximizedCallback);
 		glfwSetWindowIconifyCallback(pWindow->GetGLFWHandle(), GLFWWindowMinimzedCallback);
 		glfwSetWindowFocusCallback(pWindow->GetGLFWHandle(), GLFWWindowFocusedCallback);
+		glfwSetKeyCallback(pWindow->GetGLFWHandle(), GLFWWindowKeyCallback);
+		glfwSetCharCallback(pWindow->GetGLFWHandle(), GLFWWindowKeyTypedCallback);
 
 		// Assure app is registered
 		assert(smRegistry.Contains(handle));

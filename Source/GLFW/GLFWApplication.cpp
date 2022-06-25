@@ -19,6 +19,11 @@ namespace Quartz
 
 		switch (surfaceInfo.surfaceApi)
 		{
+			case SURFACE_API_NONE:
+			{
+				printf("Creating GLFW Window with no graphics context.\n");
+			}
+
 			case SURFACE_API_OPENGL:
 			{
 				glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
@@ -62,6 +67,11 @@ namespace Quartz
 
 		switch (surfaceInfo.surfaceApi)
 		{
+			case SURFACE_API_NONE:
+			{
+				break;
+			}
+
 			case SURFACE_API_OPENGL:
 			{
 #ifdef QUARTZAPP_GLEW
@@ -84,11 +94,6 @@ namespace Quartz
 #endif
 				break;
 			}
-		}
-
-		if (!pSurface)
-		{
-			return nullptr;
 		}
 
 		pWindow = new GLFWWindow(this, pGLFWwindow, info.title, pSurface);

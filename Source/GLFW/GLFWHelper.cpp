@@ -10,6 +10,7 @@
 namespace Quartz
 {
 	bool GLFWHelper::smInitialzed = false;
+	Map<int, bool> GLFWHelper::smRepeatMap;
 
 	bool GLFWHelper::InitializeGLFW()
 	{
@@ -86,6 +87,17 @@ namespace Quartz
 
 #endif
 
+	bool GLFWHelper::IsKeyRepeating(int codepoint)
+	{
+		// TODO: Look into unknown values being possibly not false
+		return smRepeatMap[codepoint];
+	}
+
+	void GLFWHelper::SetKeyRepeating(int codepoint, bool repeat)
+	{
+		smRepeatMap[codepoint] = repeat;
+	}
+
 	void GLFWHelper::CallWindowSizeCallback(GLFWApplication* pApplication, GLFWWindow* pWindow, int width, int height)
 	{
 		if (pApplication->mWindowResizedFunc)
@@ -128,6 +140,18 @@ namespace Quartz
 	{
 		if (pApplication->mWindowFocusedFunc)
 			pApplication->mWindowFocusedFunc(pWindow, !(bool)focused);
+	}
+
+	void GLFWHelper::CallWindowKeyCallback(GLFWApplication* pApplication, GLFWWindow* pWindow, uInt16 scancode, bool down, bool repeat)
+	{
+		if (pApplication->mWindowKeyFunc)
+			pApplication->mWindowKeyFunc(pWindow, scancode, down, repeat);
+	}
+
+	void GLFWHelper::CallWindowKeyTypedCallback(GLFWApplication* pApplication, GLFWWindow* pWindow, char character, bool repeat)
+	{
+		if (pApplication->mWindowKeyTypedFunc)
+			pApplication->mWindowKeyTypedFunc(pWindow, character, repeat);
 	}
 
 	void GLFWHelper::PrintError()

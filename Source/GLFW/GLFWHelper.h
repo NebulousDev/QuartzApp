@@ -23,7 +23,8 @@ namespace Quartz
 	class GLFWHelper
 	{
 	private:
-		static bool smInitialzed;
+		static bool				smInitialzed;
+		static Map<int, bool>	smRepeatMap;
 
 	public:
 		static bool InitializeGLFW();
@@ -36,6 +37,8 @@ namespace Quartz
 		friend void ::GLFWWindowMaximizedCallback(GLFWwindow* pGLFWwindow, int mazimized);
 		friend void ::GLFWWindowMinimzedCallback(GLFWwindow* pGLFWwindow, int minimized);
 		friend void ::GLFWWindowFocusedCallback(GLFWwindow* pGLFWwindow, int focused);
+		friend void ::GLFWWindowKeyCallback(GLFWwindow* pGLFWwindow, int key, int scancode, int action, int mods);
+		friend void ::GLFWWindowKeyTypedCallback(GLFWwindow* pGLFWwindow, unsigned int codepoint);
 
 		static void SetWindowState(GLFWWindow* pWindow, GLFWWindowState state);
 
@@ -48,6 +51,9 @@ namespace Quartz
 		static VulkanSurface* CreateGLFWVulkanSurface(GLFWwindow* pGLFWwindow, const SurfaceInfo& info);
 		static void DestroyGLFWVulkanSurface(VulkanSurface* pSurface);
 #endif
+
+		static bool IsKeyRepeating(int codepoint);
+		static void SetKeyRepeating(int codepoint, bool repeat);
 
 		static void CallWindowSizeCallback(GLFWApplication* pApplication,
 			GLFWWindow* pWindow, int width, int height);
@@ -69,6 +75,12 @@ namespace Quartz
 
 		static void CallWindowFocusedCallback(GLFWApplication* pApplication,
 			GLFWWindow* pWindow, int focused);
+
+		static void CallWindowKeyCallback(GLFWApplication* pApplication,
+			GLFWWindow* pWindow, uInt16 scancode, bool down, bool repeat);
+
+		static void CallWindowKeyTypedCallback(GLFWApplication* pApplication,
+			GLFWWindow* pWindow, char character, bool repeat);
 
 		static void PrintError();
 	};
