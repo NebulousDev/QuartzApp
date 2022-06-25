@@ -214,7 +214,7 @@ namespace Quartz
 				uInt16 scancode = (uInt8)(lParam >> 16);
 				int repeatCount = WinApiHelper::GetKeyRepeatCount(scancode);
 
-				WinApiHelper::CallWindowKeyCallback(pApp, pWindow, scancode, true, repeatCount > 0);
+				WinApiHelper::CallKeyCallback(pApp, pWindow, scancode, true, repeatCount > 0);
 
 				// HACK
 				{
@@ -234,10 +234,10 @@ namespace Quartz
 
 			case WM_KEYUP:
 			case WM_SYSKEYUP:
-			{
+			{ 
 				uInt16 scancode = (uInt8)(lParam >> 16);
 
-				WinApiHelper::CallWindowKeyCallback(pApp, pWindow, scancode, false, false);
+				WinApiHelper::CallKeyCallback(pApp, pWindow, scancode, false, false);
 
 				// HACK
 				{
@@ -266,11 +266,10 @@ namespace Quartz
 				// HACK
 				int repeatCount = WinApiHelper::GetKeyRepeatCount(scancode + (shift << 15));
 
-				// Ignore CTRL codes (https://stackoverflow.com/questions/26415916)
 				if (!ctrl)
 				{
 					// NOTE: repeatCount > 1 to compensate for WM_KEYDOWN first increasing repeatCount
-					WinApiHelper::CallWindowKeyTypedCallback(pApp, pWindow, character, repeatCount > 1);
+					WinApiHelper::CallKeyTypedCallback(pApp, pWindow, character, repeatCount > 1);
 				}
 
 				break;

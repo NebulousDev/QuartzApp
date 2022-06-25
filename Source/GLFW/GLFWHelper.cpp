@@ -142,16 +142,16 @@ namespace Quartz
 			pApplication->mWindowFocusedFunc(pWindow, !(bool)focused);
 	}
 
-	void GLFWHelper::CallWindowKeyCallback(GLFWApplication* pApplication, GLFWWindow* pWindow, uInt16 scancode, bool down, bool repeat)
+	void GLFWHelper::CallKeyCallback(GLFWApplication* pApplication, GLFWWindow* pWindow, uInt16 scancode, bool down, bool repeat)
 	{
-		if (pApplication->mWindowKeyFunc)
-			pApplication->mWindowKeyFunc(pWindow, scancode, down, repeat);
+		if (pApplication->mKeyFunc)
+			pApplication->mKeyFunc(pWindow, scancode, down, repeat);
 	}
 
-	void GLFWHelper::CallWindowKeyTypedCallback(GLFWApplication* pApplication, GLFWWindow* pWindow, char character, bool repeat)
+	void GLFWHelper::CallKeyTypedCallback(GLFWApplication* pApplication, GLFWWindow* pWindow, char character, bool repeat)
 	{
-		if (pApplication->mWindowKeyTypedFunc)
-			pApplication->mWindowKeyTypedFunc(pWindow, character, repeat);
+		if (pApplication->mKeyTypedFunc)
+			pApplication->mKeyTypedFunc(pWindow, character, repeat);
 	}
 
 	void GLFWHelper::PrintError()

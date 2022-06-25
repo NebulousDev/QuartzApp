@@ -37,8 +37,8 @@ namespace Quartz
 		friend void ::GLFWWindowMaximizedCallback(GLFWwindow* pGLFWwindow, int mazimized);
 		friend void ::GLFWWindowMinimzedCallback(GLFWwindow* pGLFWwindow, int minimized);
 		friend void ::GLFWWindowFocusedCallback(GLFWwindow* pGLFWwindow, int focused);
-		friend void ::GLFWWindowKeyCallback(GLFWwindow* pGLFWwindow, int key, int scancode, int action, int mods);
-		friend void ::GLFWWindowKeyTypedCallback(GLFWwindow* pGLFWwindow, unsigned int codepoint);
+		friend void ::GLFWKeyCallback(GLFWwindow* pGLFWwindow, int key, int scancode, int action, int mods);
+		friend void ::GLFWKeyTypedCallback(GLFWwindow* pGLFWwindow, unsigned int codepoint);
 
 		static void SetWindowState(GLFWWindow* pWindow, GLFWWindowState state);
 
@@ -76,10 +76,10 @@ namespace Quartz
 		static void CallWindowFocusedCallback(GLFWApplication* pApplication,
 			GLFWWindow* pWindow, int focused);
 
-		static void CallWindowKeyCallback(GLFWApplication* pApplication,
+		static void CallKeyCallback(GLFWApplication* pApplication,
 			GLFWWindow* pWindow, uInt16 scancode, bool down, bool repeat);
 
-		static void CallWindowKeyTypedCallback(GLFWApplication* pApplication,
+		static void CallKeyTypedCallback(GLFWApplication* pApplication,
 			GLFWWindow* pWindow, char character, bool repeat);
 
 		static void PrintError();

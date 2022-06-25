@@ -22,8 +22,8 @@ namespace Quartz
 		mWindowMaximizedFunc(nullptr),
 		mWindowMinimizedFunc(nullptr),
 		mWindowFocusedFunc(nullptr),
-		mWindowKeyFunc(nullptr),
-		mWindowKeyTypedFunc(nullptr)
+		mKeyFunc(nullptr),
+		mKeyTypedFunc(nullptr)
 	{ }
 
 	void Application::SetWindowResizedCallback(WindowResizedCallbackFunc callback)
@@ -61,14 +61,14 @@ namespace Quartz
 		mWindowFocusedFunc = callback;
 	}
 
-	void Application::SetWindowKeyCallback(WindowKeyCallbackFunc callback)
+	void Application::SetKeyCallback(KeyCallbackFunc callback)
 	{
-		mWindowKeyFunc = callback;
+		mKeyFunc = callback;
 	}
 
-	void Application::SetWindowKeyTypedCallback(WindowKeyTypedCallbackFunc callback)
+	void Application::SetKeyTypedCallback(KeyTypedCallbackFunc callback)
 	{
-		mWindowKeyTypedFunc = callback;
+		mKeyTypedFunc = callback;
 	}
 
 	WindowAPI Application::GetWindowAPI() const

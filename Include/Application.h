@@ -15,8 +15,9 @@ namespace Quartz
 	typedef void(*WindowMinimizedCallbackFunc)(Window* pWindow, bool restored);
 	typedef void(*WindowFocusedCallbackFunc)(Window* pWindow, bool lost);
 
-	typedef void(*WindowKeyCallbackFunc)(Window* pWindow, uInt16 scancode, bool down, bool repeat);
-	typedef void(*WindowKeyTypedCallbackFunc)(Window* pWindow, char character, bool repeat);
+	typedef void(*KeyCallbackFunc)(Window* pWindow, uInt16 scancode, bool down, bool repeat);
+	typedef void(*KeyTypedCallbackFunc)(Window* pWindow, char character, bool repeat);
+
 
 	enum WindowAPI
 	{
@@ -55,8 +56,8 @@ namespace Quartz
 		WindowMaximizedCallbackFunc			mWindowMaximizedFunc;
 		WindowMinimizedCallbackFunc			mWindowMinimizedFunc;
 		WindowFocusedCallbackFunc			mWindowFocusedFunc;
-		WindowKeyCallbackFunc				mWindowKeyFunc;
-		WindowKeyTypedCallbackFunc			mWindowKeyTypedFunc;
+		KeyCallbackFunc						mKeyFunc;
+		KeyTypedCallbackFunc				mKeyTypedFunc;
 
 	public:
 		Application(const ApplicationInfo& appInfo);
@@ -76,8 +77,8 @@ namespace Quartz
 		void SetWindowMaximizedCallback(WindowMaximizedCallbackFunc callback);
 		void SetWindowMinimizedCallback(WindowMinimizedCallbackFunc callback);
 		void SetWindowFocusedCallback(WindowFocusedCallbackFunc callback);
-		void SetWindowKeyCallback(WindowKeyCallbackFunc callback);
-		void SetWindowKeyTypedCallback(WindowKeyTypedCallbackFunc callback);
+		void SetKeyCallback(KeyCallbackFunc callback);
+		void SetKeyTypedCallback(KeyTypedCallbackFunc callback);
 
 		virtual void Update() = 0;
 

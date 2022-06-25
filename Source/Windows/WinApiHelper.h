@@ -93,10 +93,10 @@ namespace Quartz
 		static void CallWindowFocusedCallback(WinApiApplication* pApplication,
 			WinApiWindow* pWindow, int focused);
 
-		static void CallWindowKeyCallback(WinApiApplication* pApplication,
+		static void CallKeyCallback(WinApiApplication* pApplication,
 			WinApiWindow* pWindow, uInt16 scancode, bool down, bool repeat);
 
-		static void CallWindowKeyTypedCallback(WinApiApplication* pApplication,
+		static void CallKeyTypedCallback(WinApiApplication* pApplication,
 			WinApiWindow* pWindow, char character, bool repeat);
 
 		static void PrintLastError();

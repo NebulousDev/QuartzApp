@@ -75,7 +75,7 @@ void GLFWWindowFocusedCallback(GLFWwindow* pGLFWwindow, int focused)
 	GLFWHelper::CallWindowFocusedCallback(pApp, pWindow, focused);
 }
 
-void GLFWWindowKeyCallback(GLFWwindow* pGLFWwindow, int key, int scancode, int action, int mods)
+void GLFWKeyCallback(GLFWwindow* pGLFWwindow, int key, int scancode, int action, int mods)
 {
 	using namespace Quartz;
 
@@ -94,10 +94,10 @@ void GLFWWindowKeyCallback(GLFWwindow* pGLFWwindow, int key, int scancode, int a
 
 	bool down = action & (GLFW_PRESS | GLFW_REPEAT);
 
-	GLFWHelper::CallWindowKeyCallback(pApp, pWindow, scancode, down, action & GLFW_REPEAT);
+	GLFWHelper::CallKeyCallback(pApp, pWindow, scancode, down, action & GLFW_REPEAT);
 }
 
-void GLFWWindowKeyTypedCallback(GLFWwindow* pGLFWwindow, unsigned int codepoint)
+void GLFWKeyTypedCallback(GLFWwindow* pGLFWwindow, unsigned int codepoint)
 {
 	using namespace Quartz;
 
@@ -107,5 +107,5 @@ void GLFWWindowKeyTypedCallback(GLFWwindow* pGLFWwindow, unsigned int codepoint)
 	// HACK: See GLFWWindowKeyCallback()
 	bool repeat = GLFWHelper::IsKeyRepeating((char)codepoint);
 
-	GLFWHelper::CallWindowKeyTypedCallback(pApp, pWindow, (char)codepoint, repeat);
+	GLFWHelper::CallKeyTypedCallback(pApp, pWindow, (char)codepoint, repeat);
 }

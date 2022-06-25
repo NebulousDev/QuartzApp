@@ -78,7 +78,7 @@ namespace Quartz
 	{
 		VkSurfaceKHR				vkSurface;
 		Array<VkSurfaceFormatKHR>	supportedFormats;
-		VkSurfaceCapabilitiesKHR	surfaceCapibilites;
+		VkSurfaceCapabilitiesKHR	surfaceCapibilites = {};
 
 		VkWin32SurfaceCreateInfoKHR win32SurfaceInfo = {};
 		win32SurfaceInfo.sType		= VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
@@ -330,16 +330,16 @@ namespace Quartz
 			pApplication->mWindowFocusedFunc(pWindow, !(bool)focused);
 	}
 
-	void WinApiHelper::CallWindowKeyCallback(WinApiApplication* pApplication, WinApiWindow* pWindow, uInt16 scancode, bool down, bool repeat)
+	void WinApiHelper::CallKeyCallback(WinApiApplication* pApplication, WinApiWindow* pWindow, uInt16 scancode, bool down, bool repeat)
 	{
-		if (pApplication->mWindowKeyFunc)
-			pApplication->mWindowKeyFunc(pWindow, scancode, down, repeat);
+		if (pApplication->mKeyFunc)
+			pApplication->mKeyFunc(pWindow, scancode, down, repeat);
 	}
 
-	void WinApiHelper::CallWindowKeyTypedCallback(WinApiApplication* pApplication, WinApiWindow* pWindow, char character, bool repeat)
+	void WinApiHelper::CallKeyTypedCallback(WinApiApplication* pApplication, WinApiWindow* pWindow, char character, bool repeat)
 	{
-		if (pApplication->mWindowKeyTypedFunc)
-			pApplication->mWindowKeyTypedFunc(pWindow, character, repeat);
+		if (pApplication->mKeyTypedFunc)
+			pApplication->mKeyTypedFunc(pWindow, character, repeat);
 	}
 
 	void WinApiHelper::PrintLastError()
