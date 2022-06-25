@@ -17,6 +17,9 @@ namespace Quartz
 
 	typedef void(*KeyCallbackFunc)(Window* pWindow, uInt16 scancode, bool down, bool repeat);
 	typedef void(*KeyTypedCallbackFunc)(Window* pWindow, char character, bool repeat);
+	typedef void(*MouseMovedCallbackFunc)(Window* pWindow, uSize mouseX, uSize mouseY);
+	typedef void(*MouseMovedRelativeCallbackFunc)(Window* pWindow, uSize relX, uSize relY);
+	typedef void(*MouseEnteredCallbackFunc)(Window* pWindow, bool entered);
 
 
 	enum WindowAPI
@@ -58,6 +61,9 @@ namespace Quartz
 		WindowFocusedCallbackFunc			mWindowFocusedFunc;
 		KeyCallbackFunc						mKeyFunc;
 		KeyTypedCallbackFunc				mKeyTypedFunc;
+		MouseMovedCallbackFunc				mMouseMovedFunc;
+		MouseMovedRelativeCallbackFunc		mMouseMovedRelativeFunc;
+		MouseEnteredCallbackFunc			mMouseEnteredFunc;
 
 	public:
 		Application(const ApplicationInfo& appInfo);
@@ -79,6 +85,9 @@ namespace Quartz
 		void SetWindowFocusedCallback(WindowFocusedCallbackFunc callback);
 		void SetKeyCallback(KeyCallbackFunc callback);
 		void SetKeyTypedCallback(KeyTypedCallbackFunc callback);
+		void SetMouseMovedCallback(MouseMovedCallbackFunc callback);
+		void SetMouseMovedRelativeCallback(MouseMovedRelativeCallbackFunc callback);
+		void SetMouseEnteredCallback(MouseEnteredCallbackFunc callback);
 
 		virtual void Update() = 0;
 

@@ -67,6 +67,9 @@ namespace Quartz
 		static bool GetWindowLastMaximized(WinApiWindow* pWindow);
 		static void SetWindowLastMaximized(WinApiWindow* pWindow, bool lastMaximized);
 
+		static bool IsMouseInside(WinApiWindow* pWindow);
+		static void SetMouseInside(WinApiWindow* pWindow, bool inside);
+
 		static bool SetDisplayMode(uSize monitor, uSize width, uSize height, uSize refreshRate);
 
 		static uSize GetKeyRepeatCount(int scancode);
@@ -98,6 +101,15 @@ namespace Quartz
 
 		static void CallKeyTypedCallback(WinApiApplication* pApplication,
 			WinApiWindow* pWindow, char character, bool repeat);
+
+		static void CallMouseMovedCallback(WinApiApplication* pApplication,
+			WinApiWindow* pWindow, uSize mouseX, uSize mouseY);
+
+		static void CallMouseMovedRelativeCallback(WinApiApplication* pApplication,
+			WinApiWindow* pWindow, uSize relX, uSize relY);
+
+		static void CallMouseEnteredCallback(WinApiApplication* pApplication,
+			WinApiWindow* pWindow, bool entered);
 
 		static void PrintLastError();
 	};

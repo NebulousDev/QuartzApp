@@ -32,6 +32,8 @@ namespace Quartz
 		WindowStyle mRestoreStyle;
 		Point2i		mRestorePos;
 
+		bool mMouseInside;
+
 	public:
 		WinApiWindow(Application* pParentApp, Surface* pSurface, 
 			const WindowStyle& restoreStyle, HWND hwnd);

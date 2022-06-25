@@ -71,6 +71,21 @@ namespace Quartz
 		mKeyTypedFunc = callback;
 	}
 
+	void Application::SetMouseMovedCallback(MouseMovedCallbackFunc callback)
+	{
+		mMouseMovedFunc = callback;
+	}
+
+	void Application::SetMouseMovedRelativeCallback(MouseMovedRelativeCallbackFunc callback)
+	{
+		mMouseMovedRelativeFunc = callback;
+	}
+
+	void Application::SetMouseEnteredCallback(MouseEnteredCallbackFunc callback)
+	{
+		mMouseEnteredFunc = callback;
+	}
+
 	WindowAPI Application::GetWindowAPI() const
 	{
 		return mWindowAPI;

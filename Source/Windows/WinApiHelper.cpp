@@ -239,6 +239,16 @@ namespace Quartz
 		pWindow->mLastMaximized = lastMaximized;
 	}
 
+	bool WinApiHelper::IsMouseInside(WinApiWindow* pWindow)
+	{
+		return pWindow->mMouseInside;
+	}
+
+	void WinApiHelper::SetMouseInside(WinApiWindow* pWindow, bool inside)
+	{
+		pWindow->mMouseInside = inside;
+	}
+
 	bool WinApiHelper::SetDisplayMode(uSize monitor, uSize width, uSize height, uSize refreshRate)
 	{
 		DEVMODEW				devMode;
@@ -340,6 +350,24 @@ namespace Quartz
 	{
 		if (pApplication->mKeyTypedFunc)
 			pApplication->mKeyTypedFunc(pWindow, character, repeat);
+	}
+
+	void WinApiHelper::CallMouseMovedCallback(WinApiApplication* pApplication, WinApiWindow* pWindow, uSize mouseX, uSize mouseY)
+	{
+		if (pApplication->mMouseMovedFunc)
+			pApplication->mMouseMovedFunc(pWindow, mouseX, mouseY);
+	}
+
+	void WinApiHelper::CallMouseMovedRelativeCallback(WinApiApplication* pApplication, WinApiWindow* pWindow, uSize relX, uSize relY)
+	{
+		if (pApplication->mMouseMovedRelativeFunc)
+			pApplication->mMouseMovedRelativeFunc(pWindow, relX, relY);
+	}
+
+	void WinApiHelper::CallMouseEnteredCallback(WinApiApplication* pApplication, WinApiWindow* pWindow, bool entered)
+	{
+		if (pApplication->mMouseEnteredFunc)
+			pApplication->mMouseEnteredFunc(pWindow, entered);
 	}
 
 	void WinApiHelper::PrintLastError()

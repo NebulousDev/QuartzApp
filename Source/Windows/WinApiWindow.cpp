@@ -12,7 +12,8 @@ namespace Quartz
 		mFullscreen(false),
 		mLastMinimized(false),
 		mLastMaximized(false),
-		mRestoreStyle(restoreStyle) { }
+		mRestoreStyle(restoreStyle),
+		mMouseInside(false) { }
 
 	bool WinApiWindow::RequestClose()
 	{

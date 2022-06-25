@@ -275,6 +275,39 @@ namespace Quartz
 				break;
 			}
 
+			case WM_MOUSEMOVE:
+			{
+				WORD mouseX = LOWORD(lParam);
+				WORD mouseY = HIWORD(lParam);
+
+				WinApiHelper::CallMouseMovedCallback(pApp, pWindow, mouseX, mouseY);
+
+				if (!WinApiHelper::IsMouseInside(pWindow))
+				{
+					TRACKMOUSEEVENT trackEvent;
+					trackEvent.cbSize		= sizeof(TRACKMOUSEEVENT);
+					trackEvent.hwndTrack	= hwnd;
+					trackEvent.dwFlags		= TME_LEAVE;
+					trackEvent.dwHoverTime	= 0;
+
+					if (TrackMouseEvent(&trackEvent))
+					{
+						WinApiHelper::CallMouseEnteredCallback(pApp, pWindow, true);
+						WinApiHelper::SetMouseInside(pWindow, true);
+					}
+				}
+
+				break;
+			}
+
+			case WM_MOUSELEAVE:
+			{
+				WinApiHelper::CallMouseEnteredCallback(pApp, pWindow, false);
+				WinApiHelper::SetMouseInside(pWindow, false);
+
+				break;
+			}
+
 			case WM_CLOSE:
 			{
 				if (lParam == WINAPI_CLOSE_REQUEST_PARAM)
