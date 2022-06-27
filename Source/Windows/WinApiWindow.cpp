@@ -303,7 +303,7 @@ namespace Quartz
 		}
 
 		AppLogCallback(pWinApiApp->GetLogCallback(), LOG_LEVEL_INFO,
-			"QuartzApp: Set window fullscreen (%s).", fullscreen ? "true" : "false");
+			"QuartzApp: Set window (%s) fullscreen (%s).", GetTitle().Str(), fullscreen ? "true" : "false");
 
 		return true;
 	}

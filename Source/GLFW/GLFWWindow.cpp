@@ -226,7 +226,7 @@ namespace Quartz
 		}
 
 		AppLogCallback(pGLFWApp->GetLogCallback(), LOG_LEVEL_INFO,
-			"QuartzApp: Set window fullscreen (%s).", fullscreen ? "true" : "false");
+			"QuartzApp: Set window (%s) fullscreen (%s).", GetTitle().Str(), fullscreen ? "true" : "false");
 
 		return true;
 	}
@@ -254,7 +254,9 @@ namespace Quartz
 
 		if (glfwGetWindowAttrib(mpGLFWwindow, GLFW_DECORATED) != glfwBool)
 		{
-			printf("Error setting window borderless: glfwSetWindowAttrib() failed.");
+			GLFWApplication* pGLFWApp = static_cast<GLFWApplication*>(mpParent);
+			AppLogCallback(pGLFWApp->GetLogCallback(), LOG_LEVEL_ERROR,
+				"QuartzApp: Error setting window borderless: glfwSetWindowAttrib() failed.");
 			return false;
 		}
 
@@ -284,7 +286,9 @@ namespace Quartz
 
 		if (glfwGetWindowAttrib(mpGLFWwindow, GLFW_RESIZABLE) != glfwBool)
 		{
-			printf("Error setting window unresizable: glfwSetWindowAttrib() failed.");
+			GLFWApplication* pGLFWApp = static_cast<GLFWApplication*>(mpParent);
+			AppLogCallback(pGLFWApp->GetLogCallback(), LOG_LEVEL_ERROR,
+				"QuartzApp: Error setting window unresizable: glfwSetWindowAttrib() failed.");
 			return false;
 		}
 
@@ -314,7 +318,9 @@ namespace Quartz
 
 		if (glfwGetWindowAttrib(mpGLFWwindow, GLFW_VISIBLE) != glfwBool)
 		{
-			printf("Error setting window visibility: glfwSetWindowAttrib() failed.");
+			GLFWApplication* pGLFWApp = static_cast<GLFWApplication*>(mpParent);
+			AppLogCallback(pGLFWApp->GetLogCallback(), LOG_LEVEL_ERROR,
+				"QuartzApp: Error setting window visibility: glfwSetWindowAttrib() failed.");
 			return false;
 		}
 
