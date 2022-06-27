@@ -41,6 +41,16 @@ namespace Quartz
 		pWindow->mWindowState = state;
 	}
 
+	Point2i GLFWHelper::GetLastMousePos(GLFWWindow* pWindow)
+	{
+		return pWindow->mLastMouse;
+	}
+
+	void GLFWHelper::SetLastMousePos(GLFWWindow* pWindow, const Point2i& position)
+	{
+		pWindow->mLastMouse = position;
+	}
+
 #ifdef QUARTZAPP_GLEW
 
 	GLSurface* GLFWHelper::CreateGLFWGLSurface()
@@ -142,16 +152,34 @@ namespace Quartz
 			pApplication->mWindowFocusedFunc(pWindow, !(bool)focused);
 	}
 
-	void GLFWHelper::CallKeyCallback(GLFWApplication* pApplication, GLFWWindow* pWindow, uInt16 scancode, bool down, bool repeat)
+	void GLFWHelper::CallKeyCallback(GLFWApplication* pApplication, GLFWWindow* pWindow, int scancode, bool down, bool repeat)
 	{
 		if (pApplication->mKeyFunc)
-			pApplication->mKeyFunc(pWindow, scancode, down, repeat);
+			pApplication->mKeyFunc(pWindow, (uInt16)scancode, down, repeat);
 	}
 
-	void GLFWHelper::CallKeyTypedCallback(GLFWApplication* pApplication, GLFWWindow* pWindow, char character, bool repeat)
+	void GLFWHelper::CallKeyTypedCallback(GLFWApplication* pApplication, GLFWWindow* pWindow, int codepoint, bool repeat)
 	{
 		if (pApplication->mKeyTypedFunc)
-			pApplication->mKeyTypedFunc(pWindow, character, repeat);
+			pApplication->mKeyTypedFunc(pWindow, (char)codepoint, repeat);
+	}
+
+	void GLFWHelper::CallMouseMovedCallback(GLFWApplication* pApplication, GLFWWindow* pWindow, double mouseX, double mouseY)
+	{
+		if (pApplication->mMouseMovedFunc)
+			pApplication->mMouseMovedFunc(pWindow, (uSize)mouseX, (uSize)mouseY);
+	}
+
+	void GLFWHelper::CallMouseMovedRelativeCallback(GLFWApplication* pApplication, GLFWWindow* pWindow, double relX, double relY)
+	{
+		if (pApplication->mMouseMovedRelativeFunc)
+			pApplication->mMouseMovedRelativeFunc(pWindow, (uSize)relX, (uSize)relY);
+	}
+
+	void GLFWHelper::CallMouseEnteredCallback(GLFWApplication* pApplication, GLFWWindow* pWindow, int entered)
+	{
+		if (pApplication->mMouseEnteredFunc)
+			pApplication->mMouseEnteredFunc(pWindow, (bool)entered);
 	}
 
 	void GLFWHelper::PrintError()

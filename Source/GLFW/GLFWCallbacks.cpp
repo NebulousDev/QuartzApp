@@ -107,5 +107,48 @@ void GLFWKeyTypedCallback(GLFWwindow* pGLFWwindow, unsigned int codepoint)
 	// HACK: See GLFWWindowKeyCallback()
 	bool repeat = GLFWHelper::IsKeyRepeating((char)codepoint);
 
-	GLFWHelper::CallKeyTypedCallback(pApp, pWindow, (char)codepoint, repeat);
+	GLFWHelper::CallKeyTypedCallback(pApp, pWindow, codepoint, repeat);
+}
+
+void GLFWMouseMovedCallback(GLFWwindow* pGLFWwindow, double mouseX, double mouseY)
+{
+	using namespace Quartz;
+
+	GLFWWindow* pWindow = (GLFWWindow*)glfwGetWindowUserPointer(pGLFWwindow);
+	GLFWApplication* pApp = (GLFWApplication*)pWindow->GetParentApplication();
+
+	Point2i pos = Point2i(mouseX, mouseY);
+	Point2i relative = pos - GLFWHelper::GetLastMousePos(pWindow);
+
+	GLFWHelper::CallMouseMovedCallback(pApp, pWindow, mouseX, mouseY);
+	GLFWHelper::CallMouseMovedRelativeCallback(pApp, pWindow, relative.x, relative.y);
+
+	GLFWHelper::SetLastMousePos(pWindow, pos);
+}
+
+void GLFWMouseMovedRelativeCallback(GLFWwindow* pGLFWwindow, double relX, double relY)
+{
+	using namespace Quartz;
+
+	GLFWWindow* pWindow = (GLFWWindow*)glfwGetWindowUserPointer(pGLFWwindow);
+	GLFWApplication* pApp = (GLFWApplication*)pWindow->GetParentApplication();
+
+	GLFWHelper::CallMouseMovedRelativeCallback(pApp, pWindow, relX, relY);
+}
+
+void GLFWMouseEnteredCallback(GLFWwindow* pGLFWwindow, int entered)
+{
+	using namespace Quartz;
+
+	GLFWWindow* pWindow = (GLFWWindow*)glfwGetWindowUserPointer(pGLFWwindow);
+	GLFWApplication* pApp = (GLFWApplication*)pWindow->GetParentApplication();
+
+	if (entered)
+	{
+		double posX, posY;
+		glfwGetCursorPos(pWindow->GetGLFWHandle(), &posX, &posY);
+		GLFWHelper::SetLastMousePos(pWindow, { (sSize)posX, (sSize)posY });
+	}
+
+	GLFWHelper::CallMouseEnteredCallback(pApp, pWindow, entered);
 }

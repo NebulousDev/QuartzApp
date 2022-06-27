@@ -3,6 +3,7 @@
 #include "Types/Types.h"
 #include "Types/Map.h"
 #include "Types/Array.h"
+#include "Math/Point.h"
 
 #include "GLFWWindow.h"
 #include "GLFWCallbacks.h"
@@ -30,17 +31,10 @@ namespace Quartz
 		static bool InitializeGLFW();
 		static bool IsGLFWInitialized();
 
-		friend void ::GLFWWindowSizeCallback(GLFWwindow* pGLFWwindow, int width, int height);
-		friend void ::GLFWWindowPosCallback(GLFWwindow* pGLFWwindow, int posX, int posY);
-		friend bool ::GLFWWindowCloseRequestedCallback(GLFWwindow* pGLFWwindow);
-		friend void ::GLFWWindowClosedCallback(GLFWwindow* pGLFWwindow);
-		friend void ::GLFWWindowMaximizedCallback(GLFWwindow* pGLFWwindow, int mazimized);
-		friend void ::GLFWWindowMinimzedCallback(GLFWwindow* pGLFWwindow, int minimized);
-		friend void ::GLFWWindowFocusedCallback(GLFWwindow* pGLFWwindow, int focused);
-		friend void ::GLFWKeyCallback(GLFWwindow* pGLFWwindow, int key, int scancode, int action, int mods);
-		friend void ::GLFWKeyTypedCallback(GLFWwindow* pGLFWwindow, unsigned int codepoint);
-
 		static void SetWindowState(GLFWWindow* pWindow, GLFWWindowState state);
+
+		static Point2i GetLastMousePos(GLFWWindow* pWindow);
+		static void SetLastMousePos(GLFWWindow* pWindow, const Point2i& position);
 
 #ifdef QUARTZAPP_GLEW
 		static GLSurface* CreateGLFWGLSurface();
@@ -77,10 +71,19 @@ namespace Quartz
 			GLFWWindow* pWindow, int focused);
 
 		static void CallKeyCallback(GLFWApplication* pApplication,
-			GLFWWindow* pWindow, uInt16 scancode, bool down, bool repeat);
+			GLFWWindow* pWindow, int scancode, bool down, bool repeat);
 
 		static void CallKeyTypedCallback(GLFWApplication* pApplication,
-			GLFWWindow* pWindow, char character, bool repeat);
+			GLFWWindow* pWindow, int codepoint, bool repeat);
+
+		static void CallMouseMovedCallback(GLFWApplication* pApplication,
+			GLFWWindow* pWindow, double mouseX, double mouseY);
+
+		static void CallMouseMovedRelativeCallback(GLFWApplication* pApplication,
+			GLFWWindow* pWindow, double relX, double relY);
+
+		static void CallMouseEnteredCallback(GLFWApplication* pApplication,
+			GLFWWindow* pWindow, int entered);
 
 		static void PrintError();
 	};

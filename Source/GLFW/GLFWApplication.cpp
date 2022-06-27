@@ -22,6 +22,8 @@ namespace Quartz
 			case SURFACE_API_NONE:
 			{
 				printf("Creating GLFW Window with no graphics context.\n");
+
+				break;
 			}
 
 			case SURFACE_API_OPENGL:
@@ -114,6 +116,22 @@ namespace Quartz
 		}
 
 		glfwSetWindowUserPointer(pGLFWwindow, (void*)pWindow);
+
+		glfwSetWindowSizeCallback(pGLFWwindow, GLFWWindowSizeCallback);
+		glfwSetWindowPosCallback(pGLFWwindow, GLFWWindowPosCallback);
+		glfwSetWindowMaximizeCallback(pGLFWwindow, GLFWWindowMaximizedCallback);
+		glfwSetWindowIconifyCallback(pGLFWwindow, GLFWWindowMinimzedCallback);
+		glfwSetWindowFocusCallback(pGLFWwindow, GLFWWindowFocusedCallback);
+		glfwSetKeyCallback(pGLFWwindow, GLFWKeyCallback);
+		glfwSetCharCallback(pGLFWwindow, GLFWKeyTypedCallback);
+		glfwSetCursorPosCallback(pGLFWwindow, GLFWMouseMovedCallback);
+		glfwSetCursorEnterCallback(pGLFWwindow, GLFWMouseEnteredCallback);
+
+		if (glfwRawMouseMotionSupported())
+		{
+			glfwSetInputMode(pGLFWwindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+			//glfwSetInputMode(pGLFWwindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		}
 
 		GLFWRegistry::RegisterAppWindow(this, pWindow);
 		GLFWHelper::SetWindowState(pWindow, GLFW_WINDOW_STATE_OPEN);

@@ -25,6 +25,8 @@ namespace Quartz
 		GLFWwindow*		mpGLFWwindow;
 		GLFWWindowState mWindowState;
 
+		Point2i			mLastMouse;
+
 	public:
 		GLFWWindow(Application* pParentApp, GLFWwindow* pGLFWwindow, 
 			const String& title, Surface* pSurface);

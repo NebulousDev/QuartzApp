@@ -38,14 +38,6 @@ namespace Quartz
 	{
 		handle64 handle = reinterpret_cast<handle64>(pApp);
 
-		glfwSetWindowSizeCallback(pWindow->GetGLFWHandle(), GLFWWindowSizeCallback);
-		glfwSetWindowPosCallback(pWindow->GetGLFWHandle(), GLFWWindowPosCallback);
-		glfwSetWindowMaximizeCallback(pWindow->GetGLFWHandle(), GLFWWindowMaximizedCallback);
-		glfwSetWindowIconifyCallback(pWindow->GetGLFWHandle(), GLFWWindowMinimzedCallback);
-		glfwSetWindowFocusCallback(pWindow->GetGLFWHandle(), GLFWWindowFocusedCallback);
-		glfwSetKeyCallback(pWindow->GetGLFWHandle(), GLFWKeyCallback);
-		glfwSetCharCallback(pWindow->GetGLFWHandle(), GLFWKeyTypedCallback);
-
 		// Assure app is registered
 		assert(smRegistry.Contains(handle));
 
