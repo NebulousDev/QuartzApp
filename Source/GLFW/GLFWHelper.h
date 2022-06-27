@@ -5,6 +5,8 @@
 #include "Types/Array.h"
 #include "Math/Point.h"
 
+#include "LogCallbacks.h"
+
 #include "GLFWWindow.h"
 #include "GLFWCallbacks.h"
 
@@ -28,7 +30,7 @@ namespace Quartz
 		static Map<int, bool>	smRepeatMap;
 
 	public:
-		static bool InitializeGLFW();
+		static bool InitializeGLFW(LogCallbackFunc logCallback);
 		static bool IsGLFWInitialized();
 
 		static void SetWindowState(GLFWWindow* pWindow, GLFWWindowState state);
@@ -37,12 +39,12 @@ namespace Quartz
 		static void SetLastMousePos(GLFWWindow* pWindow, const Point2i& position);
 
 #ifdef QUARTZAPP_GLEW
-		static GLSurface* CreateGLFWGLSurface();
+		static GLSurface* CreateGLFWGLSurface(LogCallbackFunc logCallback);
 		static void DestroyGLFWGLSurface(GLSurface* pSurface);
 #endif
 
 #ifdef QUARTZAPP_VULKAN
-		static VulkanSurface* CreateGLFWVulkanSurface(GLFWwindow* pGLFWwindow, const SurfaceInfo& info);
+		static VulkanSurface* CreateGLFWVulkanSurface(GLFWwindow* pGLFWwindow, const SurfaceInfo& info, LogCallbackFunc logCallback);
 		static void DestroyGLFWVulkanSurface(VulkanSurface* pSurface);
 #endif
 
@@ -85,6 +87,6 @@ namespace Quartz
 		static void CallMouseEnteredCallback(GLFWApplication* pApplication,
 			GLFWWindow* pWindow, int entered);
 
-		static void PrintError();
+		static void PrintError(LogCallbackFunc logCallback);
 	};
 }

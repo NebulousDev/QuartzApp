@@ -1,5 +1,7 @@
 #include "GLFWApplication.h"
 
+#include "Log.h"
+
 #include "GLFWWindow.h"
 #include "GLFWRegistry.h"
 #include "GLFWHelper.h"
@@ -21,7 +23,7 @@ namespace Quartz
 		{
 			case SURFACE_API_NONE:
 			{
-				printf("Creating GLFW Window with no graphics context.\n");
+				AppLogCallback(mLogCallback, LOG_LEVEL_INFO, "QuartzApp: Creating GLFW Window with no graphics context.");
 
 				break;
 			}
@@ -32,7 +34,7 @@ namespace Quartz
 				glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 				glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 
-				printf("Creating GLFW Window in OpenGL mode.\n");
+				AppLogCallback(mLogCallback, LOG_LEVEL_INFO, "QuartzApp: Creating GLFW Window in OpenGL mode.");
 
 				break;
 			} 
@@ -41,20 +43,20 @@ namespace Quartz
 			{
 				glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-				printf("Creating GLFW Window in Vulkan mode.\n");
+				AppLogCallback(mLogCallback, LOG_LEVEL_INFO, "QuartzApp: Creating GLFW Window in Vulkan mode.");
 
 				break;
 			}
 
 			case SURFACE_API_DX12:
 			{
-				printf("Error creating GLFW Window: DX12 is not available for GLFW windows.");
+				AppLogCallback(mLogCallback, LOG_LEVEL_ERROR, "QuartzApp: Error creating GLFW Window: DX12 is not available for GLFW windows.");
 				return nullptr;
 			}
 
 			default:
 			{
-				printf("Error creating GLFW Window: Invalid SurfaceAPI enum.");
+				AppLogCallback(mLogCallback, LOG_LEVEL_ERROR, "QuartzApp: Error creating GLFW Window: Invalid SurfaceAPI enum.");
 				return nullptr;
 			}
 		}
@@ -63,7 +65,7 @@ namespace Quartz
 
 		if (!pGLFWwindow)
 		{
-			GLFWHelper::PrintError();
+			GLFWHelper::PrintError(mLogCallback);
 			return nullptr;
 		}
 
@@ -77,9 +79,9 @@ namespace Quartz
 			case SURFACE_API_OPENGL:
 			{
 #ifdef QUARTZAPP_GLEW
-				pSurface = GLFWHelper::CreateGLFWGLSurface();
+				pSurface = GLFWHelper::CreateGLFWGLSurface(mLogCallback);
 #else
-				printf("Error creating GLFW GL Window: GLEW is not available.");
+				AppLogCallback(mLogCallback, LOG_LEVEL_ERROR, "QuartzApp: Error creating GLFW GL Window: GLEW is not available.");
 				return nullptr;
 #endif
 				break;
@@ -89,9 +91,9 @@ namespace Quartz
 			{
 
 #ifdef QUARTZAPP_VULKAN
-				pSurface = GLFWHelper::CreateGLFWVulkanSurface(pGLFWwindow, surfaceInfo);
+				pSurface = GLFWHelper::CreateGLFWVulkanSurface(pGLFWwindow, surfaceInfo, mLogCallback);
 #else
-				printf("Error creating GLFW Vulkan Window: Vulkan is not available.");
+				AppLogCallback(mLogCallback, LOG_LEVEL_ERROR, "QuartzApp: Error creating GLFW Vulkan Window: Vulkan is not available.");
 				return nullptr;
 #endif
 				break;
@@ -135,6 +137,8 @@ namespace Quartz
 
 		GLFWRegistry::RegisterAppWindow(this, pWindow);
 		GLFWHelper::SetWindowState(pWindow, GLFW_WINDOW_STATE_OPEN);
+
+		AppLogCallback(mLogCallback, LOG_LEVEL_INFO, "QuartzApp: GLFW Window (%s) created successfully.", info.title.Str());
 
 		return static_cast<Window*>(pWindow);
 	}
@@ -219,7 +223,7 @@ namespace Quartz
 	{
 		if (!GLFWHelper::IsGLFWInitialized())
 		{
-			if (!GLFWHelper::InitializeGLFW())
+			if (!GLFWHelper::InitializeGLFW(appInfo.logCallback))
 			{
 				return nullptr;
 			}
@@ -228,6 +232,9 @@ namespace Quartz
 		GLFWApplication* pApplication = new GLFWApplication(appInfo);
 
 		GLFWRegistry::RegisterApp(pApplication);
+
+		AppLogCallback(appInfo.logCallback, LOG_LEVEL_INFO,
+			"QuartzApp: GLFW Application (%s, %s) created succesfully.", appInfo.appName.Str(), appInfo.version.Str());
 
 		return pApplication;
 	}

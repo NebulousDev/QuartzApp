@@ -1,6 +1,9 @@
 #include "WinApiRegistry.h"
 
+#include "Log.h"
+
 #include "WinApiApplication.h"
+#include "WinApiWindow.h"
 
 #include <cassert>
 
@@ -17,6 +20,10 @@ namespace Quartz
 
 		// Construct blank entry
 		smRegistry.Put(handle);
+
+		AppLogCallback(pApp->GetLogCallback(), LOG_LEVEL_TRACE,
+			"QuartzApp: Registered WinApi Application (%s, %s) with handle [%p].", 
+			pApp->GetAppName().Str(), pApp->GetAppVersion().Str(), handle);
 	}
 
 	void WinApiRegistry::UnregisterApp(const WinApiApplication* pApp)
@@ -29,6 +36,10 @@ namespace Quartz
 		{
 			smRegistry.Remove(handle);
 		}
+
+		AppLogCallback(pApp->GetLogCallback(), LOG_LEVEL_TRACE,
+			"QuartzApp: Unregistered WinApi Application (%s, %s) with handle [%p].", 
+			pApp->GetAppName().Str(), pApp->GetAppVersion().Str(), handle);
 	}
 
 	void WinApiRegistry::RegisterAppWindow(const WinApiApplication* pApp, WinApiWindow* pWindow)
@@ -39,6 +50,9 @@ namespace Quartz
 		assert(smRegistry.Contains(handle));
 
 		smRegistry[handle].PushBack(pWindow);
+
+		AppLogCallback(pApp->GetLogCallback(), LOG_LEVEL_TRACE,
+			"QuartzApp: Registered WinApi Window (%s) with handle [%p].", pWindow->GetTitle().Str(), handle);
 	}
 
 	void WinApiRegistry::UnregisterAppWindow(const WinApiApplication* pApp, WinApiWindow* pWindow)
@@ -54,6 +68,9 @@ namespace Quartz
 			if (windowItr != windows.End())
 			{
 				windows.Remove(windowItr);
+
+				AppLogCallback(pApp->GetLogCallback(), LOG_LEVEL_TRACE,
+					"QuartzApp: Unregistered WinApi Window (%s) with handle [%p].", pWindow->GetTitle().Str(), handle);
 			}
 		}
 	}

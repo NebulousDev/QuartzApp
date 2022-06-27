@@ -39,11 +39,13 @@ namespace Quartz
 		WinApiApplication* pWinApiApp = static_cast<WinApiApplication*>(mpParent);
 		HINSTANCE hInstance = pWinApiApp->GetInstance();
 
-		Surface* pNewSurface = WinApiHelper::CreateSurface(hInstance, mHwnd, info);
+		Surface* pNewSurface = WinApiHelper::CreateSurface(hInstance, mHwnd, info, pWinApiApp->GetLogCallback());
 
 		if (!pNewSurface && (info.surfaceApi != SURFACE_API_NONE))
 		{
-			printf("Error creating new Surface: CreateSurface() failed. Using existing...\n");
+			AppLogCallback(pWinApiApp->GetLogCallback(), LOG_LEVEL_ERROR, 
+				"QuartzApp: Error creating new Surface: CreateSurface() failed. Using existing...\n");
+
 			return false;
 		}
 
@@ -268,12 +270,14 @@ namespace Quartz
 			return true;
 		}
 
+		WinApiApplication* pWinApiApp = static_cast<WinApiApplication*>(mpParent);
+
 		if (!mFullscreen)
 		{
 			Vec2i size = GetSize();
 			uSize refreshRate = WinApiHelper::GetDefaultMonitorRefreshRate();
 
-			if (!WinApiHelper::SetDisplayMode(0, size.x, size.y, refreshRate))
+			if (!WinApiHelper::SetDisplayMode(0, size.x, size.y, refreshRate, pWinApiApp->GetLogCallback()))
 			{
 				return false;
 			}
@@ -282,15 +286,13 @@ namespace Quartz
 			Move(0, 0); // Error check?
 
 			mFullscreen = true;
-
-			return true;
 		}
 		else
 		{
 			Vec2u size = WinApiHelper::GetDefaultMonitorSize();
 			uSize refreshRate = WinApiHelper::GetDefaultMonitorRefreshRate();
 
-			if (!WinApiHelper::SetDisplayMode(0, size.x, size.y, refreshRate))
+			if (!WinApiHelper::SetDisplayMode(0, size.x, size.y, refreshRate, pWinApiApp->GetLogCallback()))
 			{
 				return false;
 			}
@@ -298,9 +300,12 @@ namespace Quartz
 			Move(mRestorePos); // Error check?
 
 			mFullscreen = false;
-
-			return true;
 		}
+
+		AppLogCallback(pWinApiApp->GetLogCallback(), LOG_LEVEL_INFO,
+			"QuartzApp: Set window fullscreen (%s).", fullscreen ? "true" : "false");
+
+		return true;
 	}
 
 	bool WinApiWindow::IsBorderlessAvailable() const

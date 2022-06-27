@@ -4,6 +4,7 @@
 #include "Window.h"
 #include "Surface.h"
 #include "DLL.h"
+#include "LogCallbacks.h"
 
 namespace Quartz
 {
@@ -41,6 +42,7 @@ namespace Quartz
 		WindowAPI			windowApi;
 		String				appName;
 		String				version;
+		LogCallbackFunc		logCallback;
 		ApplicationHints	hints;
 	};
 
@@ -48,8 +50,9 @@ namespace Quartz
 	{
 	protected:
 		String				mAppName;
-		String				mVersion;
+		String				mAppVersion;
 		WindowAPI			mWindowAPI;
+		LogCallbackFunc		mLogCallback;
 		ApplicationHints	mHints;
 
 		WindowResizedCallbackFunc			mWindowResizedFunc;
@@ -89,11 +92,16 @@ namespace Quartz
 		void SetMouseMovedRelativeCallback(MouseMovedRelativeCallbackFunc callback);
 		void SetMouseEnteredCallback(MouseEnteredCallbackFunc callback);
 
+		void SetLogCallback(LogCallbackFunc callback);
+
 		virtual void Update() = 0;
 
 		virtual void* GetNativeHandle() = 0;
 
+		const String& GetAppName() const;
+		const String& GetAppVersion() const;
 		WindowAPI GetWindowAPI() const;
+		LogCallbackFunc GetLogCallback() const;
 	};
 
 	QUARTZAPP_API Application* CreateApplication(const ApplicationInfo& appInfo);

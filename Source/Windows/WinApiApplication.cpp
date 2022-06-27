@@ -61,16 +61,18 @@ namespace Quartz
 
 		if (hwnd == NULL)
 		{
-			printf("Error creating WinApi Window: CreateWindowEx() returned null.\n");
-			WinApiHelper::PrintLastError();
+			AppLogCallback(mLogCallback, LOG_LEVEL_ERROR,
+				"QuartzApp: Error creating WinApi Window: CreateWindowEx() returned null.");
+			WinApiHelper::PrintLastError(mLogCallback);
 			return nullptr;
 		}
 
-		Surface* pSurface = WinApiHelper::CreateSurface(mInstance, hwnd, surfaceInfo);;
+		Surface* pSurface = WinApiHelper::CreateSurface(mInstance, hwnd, surfaceInfo, mLogCallback);
 		
 		if ((surfaceInfo.surfaceApi != SURFACE_API_NONE) && !pSurface)
 		{
-			printf("Error creating WinApi Window: Surface generation failed.\n");
+			AppLogCallback(mLogCallback, LOG_LEVEL_ERROR,
+				"QuartzApp: Error creating WinApi Window: Surface generation failed.");
 			::DestroyWindow(hwnd);
 			return nullptr;
 		}
@@ -81,8 +83,9 @@ namespace Quartz
 		SetWindowLongPtrA(hwnd, GWLP_USERDATA, (LONG_PTR)pWindow);
 		if (GetLastError())
 		{
-			printf("Warning while setting WinApi Window user data: SetWindowLongA() failed.\n");
-			WinApiHelper::PrintLastError();
+			AppLogCallback(mLogCallback, LOG_LEVEL_ERROR,
+				"QuartzApp: Error while setting WinApi Window user data: SetWindowLongA() failed.");
+			WinApiHelper::PrintLastError(mLogCallback);
 		}
 
 		// Set fullscreen last so as to not flash if something goes wrong.
@@ -90,7 +93,8 @@ namespace Quartz
 		{
 			if (!pWindow->SetFullscreen(true))
 			{
-				printf("Warning while setting WinApi Window to fullscreen mode: SetDisplayMode() failed.\n");
+				AppLogCallback(mLogCallback, LOG_LEVEL_WARNING,
+					"QuartzApp: Warning while setting WinApi Window to fullscreen mode: SetDisplayMode() failed.");
 			}
 		}
 
@@ -98,6 +102,10 @@ namespace Quartz
 		{
 			ShowWindow(hwnd, SW_SHOW);
 		}
+
+		WinApiRegistry::RegisterAppWindow(this, pWindow);
+
+		AppLogCallback(mLogCallback, LOG_LEVEL_INFO, "QuartzApp: WinApi Window (%s) created successfully.", info.title.Str());
 
 		return pWindow;
 	}
@@ -286,7 +294,7 @@ namespace Quartz
 				{
 					WinApiHelper::SetLastMousePos(pWindow, pos);
 
-					TRACKMOUSEEVENT trackEvent;
+					TRACKMOUSEEVENT trackEvent = {};
 					trackEvent.cbSize		= sizeof(TRACKMOUSEEVENT);
 					trackEvent.hwndTrack	= hwnd;
 					trackEvent.dwFlags		= TME_LEAVE;
@@ -389,7 +397,7 @@ namespace Quartz
 				{
 					uSize refreshRate = WinApiHelper::GetDefaultMonitorRefreshRate();
 
-					WinApiHelper::SetDisplayMode(0, pWindow->GetWidth(), pWindow->GetHeight(), refreshRate);
+					WinApiHelper::SetDisplayMode(0, pWindow->GetWidth(), pWindow->GetHeight(), refreshRate, pApp->GetLogCallback());
 				}
 
 				break;
@@ -404,7 +412,7 @@ namespace Quartz
 					Vec2u size = WinApiHelper::GetDefaultMonitorSize();
 					uSize refreshRate = WinApiHelper::GetDefaultMonitorRefreshRate();
 
-					WinApiHelper::SetDisplayMode(0, size.x, size.y, refreshRate);
+					WinApiHelper::SetDisplayMode(0, size.x, size.y, refreshRate, pApp->GetLogCallback());
 				}
 
 				break;
@@ -424,7 +432,7 @@ namespace Quartz
 	{
 		if (!WinApiHelper::IsWinApiInitialized())
 		{
-			WinApiHelper::InitializeWinApi();
+			WinApiHelper::InitializeWinApi(appInfo.logCallback);
 		}
 
 		HINSTANCE hInstance = GetModuleHandle(NULL);
@@ -438,14 +446,18 @@ namespace Quartz
 
 		if (result == 0)
 		{
-			printf("Unable to create application '%s'! RegisterClass() failed.\n", appInfo.appName.Str());
-			WinApiHelper::PrintLastError();
+			AppLogCallback(appInfo.logCallback, LOG_LEVEL_ERROR,
+				"QuartzApp: Unable to create application '%s'! RegisterClass() failed.\n", appInfo.appName.Str());
+			WinApiHelper::PrintLastError(appInfo.logCallback);
 			return nullptr;
 		}
 
 		WinApiApplication* pApplication = new WinApiApplication(appInfo, hInstance, wndClass);
 
 		WinApiRegistry::RegisterApp(pApplication);
+
+		AppLogCallback(appInfo.logCallback, LOG_LEVEL_INFO,
+			"QuartzApp: WinApi Application (%s, %s) created succesfully", appInfo.appName.Str(), appInfo.version.Str());
 
 		return pApplication;
 	}

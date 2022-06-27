@@ -4,6 +4,8 @@
 #include "GLFWApplication.h"
 #include <GLFW/glfw3.h>
 
+#include "Log.h"
+
 #include <cassert>
 
 namespace Quartz
@@ -198,6 +200,8 @@ namespace Quartz
 			return true;
 		}
 
+		GLFWApplication* pGLFWApp = static_cast<GLFWApplication*>(mpParent);
+
 		if (fullscreen)
 		{
 			GLFWmonitor* pMonitor = glfwGetPrimaryMonitor();
@@ -207,7 +211,9 @@ namespace Quartz
 
 			if (glfwGetWindowMonitor(mpGLFWwindow) == nullptr)
 			{
-				printf("Error setting window fullscreen: glfwSetWindowMonitor() failed.");
+				AppLogCallback(pGLFWApp->GetLogCallback(), LOG_LEVEL_ERROR, 
+					"QuartzApp: Error setting window fullscreen: glfwSetWindowMonitor() failed.");
+
 				return false;
 			}
 		}
@@ -218,6 +224,9 @@ namespace Quartz
 
 			glfwSetWindowMonitor(mpGLFWwindow, nullptr, pos.x, pos.y, size.x, size.y, 0);
 		}
+
+		AppLogCallback(pGLFWApp->GetLogCallback(), LOG_LEVEL_INFO,
+			"QuartzApp: Set window fullscreen (%s).", fullscreen ? "true" : "false");
 
 		return true;
 	}

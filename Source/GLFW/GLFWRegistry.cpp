@@ -1,5 +1,7 @@
 #include "GLFWRegistry.h"
 
+#include "Log.h"
+
 #include "GLFWApplication.h"
 #include "GLFWWindow.h"
 #include "GLFWCallbacks.h"
@@ -20,6 +22,10 @@ namespace Quartz
 
 		// Construct blank entry
 		smRegistry.Put(handle);
+
+		AppLogCallback(pApp->GetLogCallback(), LOG_LEVEL_TRACE, 
+			"QuartzApp: Registered GLFW Application (%s, %s) with handle [%p].", 
+			pApp->GetAppName().Str(), pApp->GetAppVersion().Str(), handle);
 	}
 
 	void GLFWRegistry::UnregisterApp(const GLFWApplication* pApp)
@@ -28,10 +34,15 @@ namespace Quartz
 
 		smAppCount--;
 
+		// TODO: revisit this?
 		if (smAppCount == 0)
 		{
 			smRegistry.Remove(handle);
 		}
+
+		AppLogCallback(pApp->GetLogCallback(), LOG_LEVEL_TRACE, 
+			"QuartzApp: Unregistered GLFW Application (%s, %s) with handle [%p].", 
+			pApp->GetAppName().Str(), pApp->GetAppVersion().Str(), handle);
 	}
 
 	void GLFWRegistry::RegisterAppWindow(const GLFWApplication* pApp, GLFWWindow* pWindow)
@@ -42,6 +53,9 @@ namespace Quartz
 		assert(smRegistry.Contains(handle));
 
 		smRegistry[handle].PushBack(pWindow);
+
+		AppLogCallback(pApp->GetLogCallback(), LOG_LEVEL_TRACE, 
+			"QuartzApp: Registered GLFW Window (%s) with handle [%p].", pWindow->GetTitle().Str(), handle);
 	}
 
 	void GLFWRegistry::UnregisterAppWindow(const GLFWApplication* pApp, GLFWWindow* pWindow)
@@ -57,6 +71,9 @@ namespace Quartz
 			if (windowItr != windows.End())
 			{
 				windows.Remove(windowItr);
+
+				AppLogCallback(pApp->GetLogCallback(), LOG_LEVEL_TRACE,
+					"QuartzApp: Unregistered GLFW Window (%s) with handle [%p].", pWindow->GetTitle().Str(), handle);
 			}
 		}
 	}

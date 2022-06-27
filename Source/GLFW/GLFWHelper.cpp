@@ -3,6 +3,8 @@
 #include "GLFWApplication.h"
 #include "GLFWWindow.h"
 
+#include "Log.h"
+
 #include <GLFW/glfw3.h>
 #include <cstdio>
 #include <cassert>
@@ -12,12 +14,12 @@ namespace Quartz
 	bool GLFWHelper::smInitialzed = false;
 	Map<int, bool> GLFWHelper::smRepeatMap;
 
-	bool GLFWHelper::InitializeGLFW()
+	bool GLFWHelper::InitializeGLFW(LogCallbackFunc logCallback)
 	{
 		if (!glfwInit())
 		{
-			printf("GLFW failed to initialize.\n");
-			PrintError();
+			AppLogCallback(logCallback, LOG_LEVEL_FATAL, "QuartzApp: GLFW failed to initialize.");
+			PrintError(logCallback);
 			return false;
 		}
 
@@ -25,8 +27,8 @@ namespace Quartz
 
 		const char* glfwVersion = glfwGetVersionString();
 
-		printf("GLFW Initialized Successfully.\n");
-		printf("GLFW Version %s\n", glfwVersion);
+		AppLogCallback(logCallback, LOG_LEVEL_INFO, "QuartzApp: GLFW initialized successfully.");
+		AppLogCallback(logCallback, LOG_LEVEL_INFO, "QuartzApp: GLFW Version %s", glfwVersion);
 
 		return true;
 	}
@@ -53,7 +55,7 @@ namespace Quartz
 
 #ifdef QUARTZAPP_GLEW
 
-	GLSurface* GLFWHelper::CreateGLFWGLSurface()
+	GLSurface* GLFWHelper::CreateGLFWGLSurface(LogCallbackFunc logCallback)
 	{
 		return new GLSurface();
 	}
@@ -67,13 +69,13 @@ namespace Quartz
 
 #ifdef QUARTZAPP_VULKAN
 
-	VulkanSurface* GLFWHelper::CreateGLFWVulkanSurface(GLFWwindow* pGLFWwindow, const SurfaceInfo& info)
+	VulkanSurface* GLFWHelper::CreateGLFWVulkanSurface(GLFWwindow* pGLFWwindow, const SurfaceInfo& info, LogCallbackFunc logCallback)
 	{
 		VulkanSurfaceInfo* pApiInfo = static_cast<VulkanSurfaceInfo*>(info.pApiInfo);
 
 		if (pApiInfo == nullptr)
 		{
-			printf("Failed to create (GLFW) VulkanSurface: Invalid apiInfo.");
+			AppLogCallback(logCallback, LOG_LEVEL_ERROR, "QuartzApp: Failed to create GLFW VulkanSurface: Invalid apiInfo.");
 			return nullptr;
 		}
 
@@ -82,9 +84,11 @@ namespace Quartz
 
 		if (error)
 		{
-			PrintError();
+			PrintError(logCallback);
 			return nullptr;
 		}
+
+		AppLogCallback(logCallback, LOG_LEVEL_INFO, "QuartzApp: GLFW Vulkan Surface created successfully.");
 
 		return new VulkanSurface(pApiInfo->instance, vkSurface);
 	}
@@ -182,11 +186,10 @@ namespace Quartz
 			pApplication->mMouseEnteredFunc(pWindow, (bool)entered);
 	}
 
-	void GLFWHelper::PrintError()
+	void GLFWHelper::PrintError(LogCallbackFunc logCallback)
 	{
 		const char* glfwError;
-
 		int error = glfwGetError(&glfwError);
-		printf("GLFW fatal error: [%d]\n%s\n", error, glfwError);
+		AppLogCallback(logCallback, LOG_LEVEL_ERROR, "QuartzApp: GLFW fatal error [%d]: %s", error, glfwError);
 	}
 }

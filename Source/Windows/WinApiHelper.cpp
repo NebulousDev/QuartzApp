@@ -17,11 +17,13 @@ namespace Quartz
 
 #ifdef QUARTZAPP_VULKAN
 
-	void WinApiHelper::InitializeWinApi()
+	void WinApiHelper::InitializeWinApi(LogCallbackFunc logCallback)
 	{
 		smMonitorSize = GetCurrentMonitorSize();
 		smMonitorRefreshRate = GetCurrentMonitorRefreshRate();
 		smInitialized = true;
+
+		AppLogCallback(logCallback, LOG_LEVEL_INFO, "QuartzApp: WinApi initialized successfully.");
 	}
 
 	bool WinApiHelper::IsWinApiInitialized()
@@ -29,7 +31,7 @@ namespace Quartz
 		return smInitialized;
 	}
 
-	Surface* WinApiHelper::CreateSurface(HINSTANCE instance, HWND hwnd, const SurfaceInfo& info)
+	Surface* WinApiHelper::CreateSurface(HINSTANCE instance, HWND hwnd, const SurfaceInfo& info, LogCallbackFunc logCallback)
 	{
 		Surface* pSurface = nullptr;
 
@@ -43,9 +45,9 @@ namespace Quartz
 			case SURFACE_API_OPENGL:
 			{
 #ifdef QUARTZAPP_GLEW
-				pSurface = WinApiHelper::CreateWinApiGLFWGLSurface();
+				pSurface = WinApiHelper::CreateWinApiGLSurface(logCallback);
 #else
-				printf("Error creating Windows GL Surface: GLEW is not available.\n");
+				AppLogCallback(logCallback, LOG_LEVEL_ERROR, "QuartzApp: Error creating Windows GL Surface: GLEW is not available.\n");
 #endif
 				return pSurface;
 			}
@@ -54,27 +56,27 @@ namespace Quartz
 			{
 
 #ifdef QUARTZAPP_VULKAN
-				pSurface = WinApiHelper::CreateWinApiVulkanSurface(instance, hwnd, info);
+				pSurface = WinApiHelper::CreateWinApiVulkanSurface(instance, hwnd, info, logCallback);
 #else
-				printf("Error creating Windows Vulkan Surface: Vulkan is not available.\n");
+				AppLogCallback(logCallback, LOG_LEVEL_ERROR, "QuartzApp: Error creating Windows Vulkan Surface: Vulkan is not available.\n");
 #endif
 				return pSurface;
 			}
 
 			default:
 			{
-				printf("Error creating Surface: Invalid SurfaceAPI enum.\n");
+				AppLogCallback(logCallback, LOG_LEVEL_ERROR, "QuartzApp: Error creating Surface: Invalid SurfaceAPI enum.\n");
 				return nullptr;
 			}
 		}
 	}
 
-	GLSurface* WinApiHelper::CreateWinApiGLFWGLSurface()
+	GLSurface* WinApiHelper::CreateWinApiGLSurface(LogCallbackFunc logCallback)
 	{
 		return nullptr;
 	}
 
-	VulkanSurface* WinApiHelper::CreateWinApiVulkanSurface(HINSTANCE instance, HWND hwnd, const SurfaceInfo& info)
+	VulkanSurface* WinApiHelper::CreateWinApiVulkanSurface(HINSTANCE instance, HWND hwnd, const SurfaceInfo& info, LogCallbackFunc logCallback)
 	{
 		VkSurfaceKHR				vkSurface;
 		Array<VkSurfaceFormatKHR>	supportedFormats;
@@ -89,7 +91,7 @@ namespace Quartz
 
 		if (!pVulkanSurfaceInfo)
 		{
-			printf("Error creating Vulkan Surface: SurfaceInfo->pApiInfo is null.\n");
+			AppLogCallback(logCallback, LOG_LEVEL_ERROR, "QuartzApp: Error creating Vulkan Surface: SurfaceInfo->pApiInfo is null.\n");
 			return nullptr;
 		}
 
@@ -98,9 +100,11 @@ namespace Quartz
 
 		if (result != VK_SUCCESS)
 		{
-			printf("Error creating Vulkan Surface: vkCreateWin32SurfaceKHR() failed.\n");
+			AppLogCallback(logCallback, LOG_LEVEL_ERROR, "Error creating Vulkan Surface: vkCreateWin32SurfaceKHR() failed.\n");
 			return nullptr;
 		}
+
+		AppLogCallback(logCallback, LOG_LEVEL_INFO, "QuartzApp: WinApi Vulkan Surface created successfully.");
 
 		return new VulkanSurface(vkInstance, vkSurface);
 	}
@@ -259,7 +263,7 @@ namespace Quartz
 		pWindow->mLastMouse = position;
 	}
 
-	bool WinApiHelper::SetDisplayMode(uSize monitor, uSize width, uSize height, uSize refreshRate)
+	bool WinApiHelper::SetDisplayMode(uSize monitor, uSize width, uSize height, uSize refreshRate, LogCallbackFunc logCallback)
 	{
 		DEVMODEW				devMode;
 		DISPLAY_DEVICEW			displayDevice;
@@ -271,7 +275,7 @@ namespace Quartz
 		
 		if (monitor > allDevices.Size())
 		{
-			printf("Failed to set WinApi display mode: Monitor id [%d] not valid.\n", monitor);
+			AppLogCallback(logCallback, LOG_LEVEL_ERROR, "QuartzApp: Failed to set WinApi display mode: Monitor id [%d] not valid.\n", monitor);
 			return false;
 		}
 
@@ -282,13 +286,13 @@ namespace Quartz
 
 		if (!FindDisplayMode(deviceName, allDevModes, width, height, refreshRate, devMode))
 		{
-			printf("Error setting display mode: No valid mode found for %dx%dx%d.\n", width, height, refreshRate);
+			AppLogCallback(logCallback, LOG_LEVEL_ERROR, "QuartzApp: Error setting display mode: No valid mode found for %dx%dx%d.\n", width, height, refreshRate);
 			return false;
 		}
 
 		if (ChangeDisplaySettingsExW(deviceName, &devMode, NULL, CDS_FULLSCREEN, NULL) != DISP_CHANGE_SUCCESSFUL)
 		{
-			printf("Error setting display mode: ChangeDisplaySettingsExW() failed.\n");
+			AppLogCallback(logCallback, LOG_LEVEL_ERROR, "QuartzApp: Error setting display mode: ChangeDisplaySettingsExW() failed.\n");
 			return false;
 		}
 
@@ -380,20 +384,20 @@ namespace Quartz
 			pApplication->mMouseEnteredFunc(pWindow, entered);
 	}
 
-	void WinApiHelper::PrintLastError()
+	void WinApiHelper::PrintLastError(LogCallbackFunc logCallback)
 	{
 		DWORD error = GetLastError();
 
-		LPWSTR pErrorMessage = nullptr;
+		LPSTR pErrorMessage = nullptr;
 
-		FormatMessageW(
+		FormatMessageA(
 			FORMAT_MESSAGE_ALLOCATE_BUFFER |
 			FORMAT_MESSAGE_FROM_SYSTEM |
 			FORMAT_MESSAGE_IGNORE_INSERTS,
 			NULL,
 			error,
 			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-			(LPWSTR)&pErrorMessage,
+			(LPSTR)&pErrorMessage,
 			0, NULL);
 
 		if (pErrorMessage == nullptr)
@@ -402,7 +406,7 @@ namespace Quartz
 			return;
 		}
 
-		wprintf(pErrorMessage);
+		AppLogCallback(logCallback, LOG_LEVEL_ERROR, pErrorMessage);
 
 		LocalFree(pErrorMessage);
 	}

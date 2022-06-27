@@ -5,6 +5,8 @@
 #include "Types/Map.h"
 #include "Math/Point.h"
 
+#include "Log.h"
+
 #ifdef QUARTZAPP_GLEW
 #include "OpenGL/GLSurface.h"
 #endif
@@ -33,18 +35,19 @@ namespace Quartz
 		static Map<int, uSize> smRepeatCounts;
 
 	public:
-		static void InitializeWinApi();
+		static void InitializeWinApi(LogCallbackFunc logCallback);
 		static bool IsWinApiInitialized();
 
-		static Surface* CreateSurface(HINSTANCE instance, HWND hwnd, const SurfaceInfo& info);
+		static Surface* CreateSurface(HINSTANCE instance, HWND hwnd, const SurfaceInfo& info, 
+			LogCallbackFunc logCallback);
 
 #ifdef QUARTZAPP_GLEW
-		static GLSurface* CreateWinApiGLFWGLSurface();
+		static GLSurface* CreateWinApiGLSurface(LogCallbackFunc logCallback);
 #endif
 
 #ifdef QUARTZAPP_VULKAN
-		static VulkanSurface* CreateWinApiVulkanSurface(
-			HINSTANCE instance, HWND hwnd, const SurfaceInfo& info);
+		static VulkanSurface* CreateWinApiVulkanSurface(HINSTANCE instance, HWND hwnd, 
+			const SurfaceInfo& info, LogCallbackFunc logCallback);
 #endif
 
 		static void QueryDisplayDevices(Array<DISPLAY_DEVICEW>& devices);
@@ -73,7 +76,8 @@ namespace Quartz
 		static Point2i GetLastMousePos(WinApiWindow* pWindow);
 		static void SetLastMousePos(WinApiWindow* pWindow, const Point2i& position);
 
-		static bool SetDisplayMode(uSize monitor, uSize width, uSize height, uSize refreshRate);
+		static bool SetDisplayMode(uSize monitor, uSize width, uSize height, 
+			uSize refreshRate, LogCallbackFunc logCallback);
 
 		static uSize GetKeyRepeatCount(int scancode);
 		static void SetKeyRepeatCount(int scancode, uSize count);
@@ -114,6 +118,6 @@ namespace Quartz
 		static void CallMouseEnteredCallback(WinApiApplication* pApplication,
 			WinApiWindow* pWindow, bool entered);
 
-		static void PrintLastError();
+		static void PrintLastError(LogCallbackFunc logCallback);
 	};
 }

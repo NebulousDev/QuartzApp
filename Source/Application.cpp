@@ -1,5 +1,7 @@
 #include "Application.h"
 
+#include "Log.h"
+
 #ifdef QUARTZAPP_GLFW
 #include "GLFW/GLFWApplication.h"
 #endif
@@ -12,7 +14,8 @@ namespace Quartz
 {
 	Application::Application(const ApplicationInfo& appInfo) :
 		mAppName(appInfo.appName),
-		mVersion(appInfo.version),
+		mAppVersion(appInfo.version),
+		mLogCallback(appInfo.logCallback),
 		mWindowAPI(WINDOW_API_NONE),
 		mHints(appInfo.hints),
 		mWindowResizedFunc(nullptr),
@@ -89,9 +92,29 @@ namespace Quartz
 		mMouseEnteredFunc = callback;
 	}
 
+	void Application::SetLogCallback(LogCallbackFunc callback)
+	{
+		mLogCallback = callback;
+	}
+
 	WindowAPI Application::GetWindowAPI() const
 	{
 		return mWindowAPI;
+	}
+
+	const String& Application::GetAppName() const
+	{
+		return mAppName;
+	}
+
+	const String& Application::GetAppVersion() const
+	{
+		return mAppVersion;
+	}
+
+	LogCallbackFunc Application::GetLogCallback() const
+	{
+		return mLogCallback;
 	}
 
 	Application* CreateApplication(const ApplicationInfo& appInfo)
@@ -106,7 +129,9 @@ namespace Quartz
 				pApplication = CreateGLFWApplication(appInfo);
 				break;
 #else
-				printf("Error creating GLFW Application: GLFW is not available.");
+				AppLogCallback(appInfo.logCallback, LOG_LEVEL_ERROR, 
+					"QuartzApp: Error creating GLFW Application: GLFW is not available.");
+
 				return nullptr;
 #endif
 			}
@@ -117,14 +142,18 @@ namespace Quartz
 				pApplication = CreateWinApiApplication(appInfo);
 				break;
 #else
-				printf("Error creating WinApi Application: WinApi is not available.");
+				AppLogCallback(appInfo.logCallback, LOG_LEVEL_ERROR, 
+					"QuartzApp: Error creating WinApi Application: WinApi is not available.");
+
 				return nullptr;
 #endif
 			}
 
 			default:
 			{
-				printf("Error creating Application: Invalid WindowAPI.");
+				AppLogCallback(appInfo.logCallback, LOG_LEVEL_ERROR, 
+					"QuartzApp: Error creating Application: Invalid WindowAPI.");
+
 				return nullptr;
 			}
 		}
@@ -161,7 +190,8 @@ namespace Quartz
 
 			default:
 			{
-				printf("Error destroying Application: Invalid WindowAPI.");
+				AppLogCallback(pApp->GetLogCallback(), LOG_LEVEL_ERROR, 
+					"QuartzApp: Error destroying Application: Invalid WindowAPI.");
 			}
 		}
 	}

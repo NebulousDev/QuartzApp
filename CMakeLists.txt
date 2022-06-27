@@ -11,7 +11,7 @@ option(QUARTZAPP_GENERATE_CONFIGS   "Enable generation of QuartzAppConfig.cmake"
 
 set(QUARTZAPP_INCLUDE_PREFIX "Quartz" CACHE STRING "Include prefix for installed headers")
 
-project(QuartzApp VERSION 1.1.0)
+project(QuartzApp VERSION 1.2.0)
 
 include(GNUInstallDirs)
 
@@ -23,6 +23,8 @@ set(QUARTZAPP_SOURCE_FILES
 	"Source/Application.cpp"
 	"Source/Window.cpp"
 	"Source/Surface.cpp"
+	"Source/LogCallbacks.cpp"
+	"Source/Log.cpp"
 )
 
 if(QUARTZAPP_ENABLE_GLFW)
@@ -171,8 +173,10 @@ if(NOT ${QUARTZ_SUPERBUILD})
 
 else()
 
-	set(QUARTZAPP_FOUND_INCLUDES ${QUARTZAPP_FOUND_INCLUDES} 
-		${QUARTZLIB_INCLUDE_PATH} ${QUARTZMATH_INCLUDE_PATH})
+	set(QUARTZAPP_FOUND_INCLUDES  ${QUARTZAPP_FOUND_INCLUDES} 
+		${QUARTZLIB_INCLUDE_PATH} 
+		${QUARTZMATH_INCLUDE_PATH}
+	)
 
 endif()
 
