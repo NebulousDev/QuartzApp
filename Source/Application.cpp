@@ -22,6 +22,9 @@ namespace Quartz
 		mWindowMaximizedFunc(nullptr),
 		mWindowMinimizedFunc(nullptr),
 		mWindowFocusedFunc(nullptr),
+		mMouseMovedFunc(nullptr),
+		mMouseMovedRelativeFunc(nullptr),
+		mMouseEnteredFunc(nullptr),
 		mKeyFunc(nullptr),
 		mKeyTypedFunc(nullptr)
 	{ }
