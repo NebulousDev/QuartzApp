@@ -249,6 +249,16 @@ namespace Quartz
 		pWindow->mMouseInside = inside;
 	}
 
+	Point2i WinApiHelper::GetLastMousePos(WinApiWindow* pWindow)
+	{
+		return pWindow->mLastMouse;
+	}
+
+	void WinApiHelper::SetLastMousePos(WinApiWindow* pWindow, const Point2i& position)
+	{
+		pWindow->mLastMouse = position;
+	}
+
 	bool WinApiHelper::SetDisplayMode(uSize monitor, uSize width, uSize height, uSize refreshRate)
 	{
 		DEVMODEW				devMode;

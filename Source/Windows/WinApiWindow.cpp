@@ -9,6 +9,7 @@ namespace Quartz
 		Window(pParentApp, pSurface),
 		mHwnd(hwnd),
 		mOpen(true),
+		mCloseRequested(false),
 		mFullscreen(false),
 		mLastMinimized(false),
 		mLastMaximized(false),

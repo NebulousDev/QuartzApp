@@ -3,7 +3,7 @@
 #include "WinApi.h"
 #include "Types/Array.h"
 #include "Types/Map.h"
-#include "Math/Vector.h"
+#include "Math/Point.h"
 
 #ifdef QUARTZAPP_GLEW
 #include "OpenGL/GLSurface.h"
@@ -69,6 +69,9 @@ namespace Quartz
 
 		static bool IsMouseInside(WinApiWindow* pWindow);
 		static void SetMouseInside(WinApiWindow* pWindow, bool inside);
+
+		static Point2i GetLastMousePos(WinApiWindow* pWindow);
+		static void SetLastMousePos(WinApiWindow* pWindow, const Point2i& position);
 
 		static bool SetDisplayMode(uSize monitor, uSize width, uSize height, uSize refreshRate);
 

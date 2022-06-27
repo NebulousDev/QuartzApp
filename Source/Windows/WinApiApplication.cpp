@@ -280,10 +280,12 @@ namespace Quartz
 				WORD mouseX = LOWORD(lParam);
 				WORD mouseY = HIWORD(lParam);
 
-				WinApiHelper::CallMouseMovedCallback(pApp, pWindow, mouseX, mouseY);
+				Point2i pos = { (uSize)mouseX, (uSize)mouseY };
 
 				if (!WinApiHelper::IsMouseInside(pWindow))
 				{
+					WinApiHelper::SetLastMousePos(pWindow, pos);
+
 					TRACKMOUSEEVENT trackEvent;
 					trackEvent.cbSize		= sizeof(TRACKMOUSEEVENT);
 					trackEvent.hwndTrack	= hwnd;
@@ -296,6 +298,12 @@ namespace Quartz
 						WinApiHelper::SetMouseInside(pWindow, true);
 					}
 				}
+
+				WinApiHelper::CallMouseMovedCallback(pApp, pWindow, mouseX, mouseY);
+
+				Vec2i relative = pos - WinApiHelper::GetLastMousePos(pWindow);
+				WinApiHelper::CallMouseMovedRelativeCallback(pApp, pWindow, relative.x, relative.y);
+				WinApiHelper::SetLastMousePos(pWindow, pos);
 
 				break;
 			}

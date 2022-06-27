@@ -33,6 +33,7 @@ namespace Quartz
 		Point2i		mRestorePos;
 
 		bool mMouseInside;
+		Point2i mLastMouse;
 
 	public:
 		WinApiWindow(Application* pParentApp, Surface* pSurface, 
