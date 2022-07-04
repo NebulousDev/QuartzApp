@@ -16,7 +16,7 @@ namespace Quartz
 		mAppName(appInfo.appName),
 		mAppVersion(appInfo.version),
 		mLogCallback(appInfo.logCallback),
-		mWindowAPI(WINDOW_API_NONE),
+		mWindowAPI(appInfo.windowApi),
 		mHints(appInfo.hints),
 		mWindowResizedFunc(nullptr),
 		mWindowMovedFunc(nullptr),
