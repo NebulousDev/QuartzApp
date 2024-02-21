@@ -11,11 +11,11 @@
 #include "GLFWCallbacks.h"
 
 #ifdef QUARTZAPP_GLEW
-#include "OpenGL/GLSurface.h"
+#include "OpenGL/GLApiSurface.h"
 #endif
 
 #ifdef QUARTZAPP_VULKAN
-#include "Vulkan/VulkanSurface.h"
+#include "Vulkan/VulkanApiSurface.h"
 #endif
 
 namespace Quartz
@@ -39,13 +39,13 @@ namespace Quartz
 		static void SetLastMousePos(GLFWWindow* pWindow, const Point2i& position);
 
 #ifdef QUARTZAPP_GLEW
-		static GLSurface* CreateGLFWGLSurface(LogCallbackFunc logCallback);
-		static void DestroyGLFWGLSurface(GLSurface* pSurface);
+		static GLApiSurface* CreateGLFWGLSurface(LogCallbackFunc logCallback);
+		static void DestroyGLFWGLSurface(GLApiSurface* pSurface);
 #endif
 
 #ifdef QUARTZAPP_VULKAN
-		static VulkanSurface* CreateGLFWVulkanSurface(GLFWwindow* pGLFWwindow, const SurfaceInfo& info, LogCallbackFunc logCallback);
-		static void DestroyGLFWVulkanSurface(VulkanSurface* pSurface);
+		static VulkanApiSurface* CreateGLFWVulkanSurface(GLFWwindow* pGLFWwindow, const SurfaceInfo& info, LogCallbackFunc logCallback);
+		static void DestroyGLFWVulkanSurface(VulkanApiSurface* pSurface);
 #endif
 
 		static bool IsKeyRepeating(int codepoint);

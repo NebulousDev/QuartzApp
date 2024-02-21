@@ -76,7 +76,7 @@ namespace Quartz
 		bool IsInvisible() const override;
 		bool SetInvisible(bool invisible) override;
 
-		void* GetNativeHandle() override;
+		void* GetNativeHandle() const override;
 
 		GLFWwindow* GetGLFWHandle();
 	};

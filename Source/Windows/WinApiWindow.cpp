@@ -52,6 +52,8 @@ namespace Quartz
 		delete mpSurface; // TODO: Add more logic here
 
 		mpSurface = pNewSurface;
+
+		return true;
 	}
 
 	bool WinApiWindow::SetTitle(const String& title)
@@ -216,6 +218,7 @@ namespace Quartz
 	{
 		RECT rect;
 		GetClientRect(mHwnd, &rect);
+		MapWindowPoints(mHwnd, HWND_DESKTOP, (LPPOINT)& rect, 2);
 
 		return Bounds2i
 		(
@@ -481,7 +484,7 @@ namespace Quartz
 		return mRestorePos;
 	}
 
-	void* WinApiWindow::GetNativeHandle()
+	void* WinApiWindow::GetNativeHandle() const
 	{
 		return (void*)mHwnd;
 	}

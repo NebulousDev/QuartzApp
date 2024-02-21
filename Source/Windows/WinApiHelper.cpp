@@ -71,12 +71,12 @@ namespace Quartz
 		}
 	}
 
-	GLSurface* WinApiHelper::CreateWinApiGLSurface(LogCallbackFunc logCallback)
+	GLApiSurface* WinApiHelper::CreateWinApiGLSurface(LogCallbackFunc logCallback)
 	{
 		return nullptr;
 	}
 
-	VulkanSurface* WinApiHelper::CreateWinApiVulkanSurface(HINSTANCE instance, HWND hwnd, const SurfaceInfo& info, LogCallbackFunc logCallback)
+	VulkanApiSurface* WinApiHelper::CreateWinApiVulkanSurface(HINSTANCE instance, HWND hwnd, const SurfaceInfo& info, LogCallbackFunc logCallback)
 	{
 		VkSurfaceKHR				vkSurface;
 		Array<VkSurfaceFormatKHR>	supportedFormats;
@@ -87,15 +87,15 @@ namespace Quartz
 		win32SurfaceInfo.hinstance	= instance;
 		win32SurfaceInfo.hwnd		= hwnd;
 
-		VulkanSurfaceInfo* pVulkanSurfaceInfo = static_cast<VulkanSurfaceInfo*>(info.pApiInfo);
+		VulkanApiSurfaceInfo* pVulkanApiSurfaceInfo = static_cast<VulkanApiSurfaceInfo*>(info.pApiInfo);
 
-		if (!pVulkanSurfaceInfo)
+		if (!pVulkanApiSurfaceInfo)
 		{
 			AppLogCallback(logCallback, LOG_LEVEL_ERROR, "QuartzApp: Error creating Vulkan Surface: SurfaceInfo->pApiInfo is null.\n");
 			return nullptr;
 		}
 
-		VkInstance vkInstance = pVulkanSurfaceInfo->instance;
+		VkInstance vkInstance = pVulkanApiSurfaceInfo->instance;
 		VkResult result = vkCreateWin32SurfaceKHR(vkInstance, &win32SurfaceInfo, nullptr, &vkSurface);
 
 		if (result != VK_SUCCESS)
@@ -106,7 +106,7 @@ namespace Quartz
 
 		AppLogCallback(logCallback, LOG_LEVEL_INFO, "QuartzApp: WinApi Vulkan Surface created successfully.");
 
-		return new VulkanSurface(vkInstance, vkSurface);
+		return new VulkanApiSurface(vkInstance, vkSurface);
 	}
 
 #endif

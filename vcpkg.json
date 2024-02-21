@@ -5,10 +5,7 @@
     "quartzlib",
     "quartzmath",
     "glfw3",
-    "glew",
-    {
-      "name": "directx-headers",
-      "platform": "windows"
-    }
+    "glew"
+    
   ]
 }

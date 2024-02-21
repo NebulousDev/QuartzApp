@@ -6,7 +6,7 @@
 
 namespace Quartz
 {
-	struct VulkanSurfaceInfo
+	struct VulkanApiSurfaceInfo
 	{
 		VkInstance			instance;
 		VkPhysicalDevice	physicalDevice;
@@ -14,17 +14,17 @@ namespace Quartz
 		bool				exclusiveFullscreen;
 	};
 
-	class VulkanSurface : public Surface
+	class VulkanApiSurface : public Surface
 	{
 	private:
 		VkInstance		vkInstance;
 		VkSurfaceKHR	vkSurface;
 
 	public:
-		VulkanSurface(VkInstance vkInstance, VkSurfaceKHR vkSurface);
+		VulkanApiSurface(VkInstance vkInstance, VkSurfaceKHR vkSurface);
 
-		VkInstance GetVkInsance();
-		VkSurfaceKHR GetVkSurface();
+		VkInstance GetVkInsance() const;
+		VkSurfaceKHR GetVkSurface() const;
 
 		bool IsFullscreen() const override;
 		bool IsHDR() const override;

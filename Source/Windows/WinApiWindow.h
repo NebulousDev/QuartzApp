@@ -95,7 +95,7 @@ namespace Quartz
 
 		WindowStyle GetRestoreStyle() const;
 		Point2i GetRestorePos() const;
-		void* GetNativeHandle() override;
+		void* GetNativeHandle() const override;
 
 		HWND GetHWND();
 	};

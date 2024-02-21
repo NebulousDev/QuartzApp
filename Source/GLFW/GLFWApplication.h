@@ -19,7 +19,7 @@ namespace Quartz
 
 		bool IsRawInputAvailable() const override;
 		bool IsRawInputEnabled() const override;
-		bool UseRawInput(bool useRawInput) override;
+		void UseRawInput(bool useRawInput) override;
 
 		void Update() override;
 		

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20.0)
+cmake_minimum_required(VERSION 3.25.0)
 
 option(QUARTZAPP_BUILD_STATIC       "Build as a static library"                     OFF)
 option(QUARTZAPP_EXPOSE_APIS        "Expose enabled APIs to parent project"         ON)
@@ -6,12 +6,16 @@ option(QUARTZAPP_ENABLE_GLFW        "Enable GLFW window creation abilities"     
 option(QUARTZAPP_ENABLE_WINAPI      "Enable WinApi window creation abilities"       ON)
 option(QUARTZAPP_ENABLE_GLEW        "Enable GLEW OpenGL context creation"           ON)
 option(QUARTZAPP_ENABLE_VULKAN      "Enable Vulkan context creation"                ON)
-option(QUARTZAPP_ENABLE_DX12        "Enable DX12 context creation"                  ON)
+option(QUARTZAPP_ENABLE_DX12        "Enable DX12 context creation"                  OFF)
+option(QUARTZAPP_ENABLE_GLSLANG     "Enable glslang linking"                        ON)
+option(QUARTZAPP_ENABLE_SHADERC     "Enable shaderc_combined linking"               ON)
+option(QUARTZAPP_ENABLE_DXC         "Enable dxc linking"                            ON)
+option(QUARTZAPP_ENABLE_SPIRV_TOOLS "Enable SPIRV-Tools linking"                    ON)
 option(QUARTZAPP_GENERATE_CONFIGS   "Enable generation of QuartzAppConfig.cmake"    ON)
 
 set(QUARTZAPP_INCLUDE_PREFIX "Quartz" CACHE STRING "Include prefix for installed headers")
 
-project(QuartzApp VERSION 1.2.0)
+project(QuartzApp VERSION 1.1.2)
 
 include(GNUInstallDirs)
 
@@ -72,11 +76,11 @@ if(QUARTZAPP_ENABLE_WINAPI)
 		message("[QuartzApp] WinApi is available.")
 
 	else()
-		message("[QuartzApp] WinApi not available. Skipping configuration.")
+		message("[QuartzApp] WinApi not available. Skipping.")
 	endif()
 
 else()
-	message("[QuartzApp] WinApi disabled. Skipping configuration.")
+	message("[QuartzApp] WinApi disabled. Skipping.")
 endif()
 
 if(QUARTZAPP_ENABLE_GLEW)
@@ -90,47 +94,92 @@ if(QUARTZAPP_ENABLE_GLEW)
 		set(QUARTZAPP_GLEW PARENT_SCOPE)
 
 		set(QUARTZAPP_SOURCE_FILES ${QUARTZAPP_SOURCE_FILES}
-			"Source/OpenGL/GLSurface.cpp"
+			"Source/OpenGL/GLApiSurface.cpp"
 		)
 
 		message("[QuartzApp] GLEW found: ${GLEW_DIR}")
 
 	else()
-		message("[QuartzApp] GLEW not found. Skipping configuration.")
+		message("[QuartzApp] GLEW not found. Skipping.")
 	endif()
 
 else()
-	message("[QuartzApp] GLEW disabled. Skipping configuration.")
+	message("[QuartzApp] GLEW disabled. Skipping.")
 endif()
 
 if(QUARTZAPP_ENABLE_VULKAN)
 
-	# Note: This *should* be using CMake's built-in FindVulkan module 
-	find_package(Vulkan QUIET)
+	# Note: This should use CMake's built-in FindVulkan module 
+	find_package(Vulkan QUIET COMPONENTS glslang shaderc_combined dxc SPIRV-Tools)
 
 	if(${Vulkan_FOUND})
 
+		message("[QuartzApp] Vulkan found: ${Vulkan_LIBRARY}")
+
 		set(QUARTZAPP_FOUND_LIBS ${QUARTZAPP_FOUND_LIBS} Vulkan::Vulkan Vulkan::Headers)
+
+		if(${Vulkan_glslang_FOUND})
+			if(QUARTZAPP_ENABLE_GLSLANG)
+				set(QUARTZAPP_FOUND_LIBS ${QUARTZAPP_FOUND_LIBS} Vulkan::glslang)
+				message("[QuartzApp] Vulkan glslang found: ${Vulkan_glslang_LIBRARY}")
+			else()
+				message("[QuartzApp] Vulkan glslang found. Disabled.")
+			endif()
+		else()
+			message("[QuartzApp] Vulkan glslang not found. Skipping.")
+		endif()
+
+		if(${Vulkan_shaderc_combined_FOUND})
+			if(QUARTZAPP_ENABLE_SHADERC)
+				set(QUARTZAPP_FOUND_LIBS ${QUARTZAPP_FOUND_LIBS} Vulkan::shaderc_combined)
+				message("[QuartzApp] Vulkan shaderc found: ${Vulkan_shaderc_combined_LIBRARY}")
+			else()
+				message("[QuartzApp] Vulkan shaderc found. Disabled.")
+			endif()
+		else()
+			message("[QuartzApp] Vulkan shaderc not found. Skipping.")
+		endif()
+
+		if(${Vulkan_dxc_lib_FOUND})
+			if(QUARTZAPP_ENABLE_DXC)
+				set(QUARTZAPP_FOUND_LIBS ${QUARTZAPP_FOUND_LIBS} Vulkan::dxc_lib)
+				message("[QuartzApp] Vulkan dxc found: ${Vulkan_dxc_LIBRARY}")
+			else()
+				message("[QuartzApp] Vulkan dxc found. Disabled.")
+			endif()
+		else()
+			message("[QuartzApp] Vulkan dxc not found. Skipping.")
+		endif()
+
+		if(${Vulkan_SPIRV-Tools_FOUND})
+			if(QUARTZAPP_ENABLE_SPIRV_TOOLS)
+				set(QUARTZAPP_FOUND_LIBS ${QUARTZAPP_FOUND_LIBS} Vulkan::SPIRV-Tools)
+				message("[QuartzApp] Vulkan SPIRV-Tools found: ${Vulkan_SPIRV-Tools_LIBRARY}")
+			else()
+				message("[QuartzApp] Vulkan SPIRV-Tools found. Disabled.")
+			endif()
+		else()
+			message("[QuartzApp] Vulkan SPIRV-Tools not found. Skipping.")
+		endif()
+
 		set(QUARTZAPP_COMIPLE_DEFINITIONS ${QUARTZAPP_COMIPLE_DEFINITIONS} QUARTZAPP_VULKAN)
 		set(QUARTZAPP_VULKAN PARENT_SCOPE)
 
 		set(QUARTZAPP_SOURCE_FILES ${QUARTZAPP_SOURCE_FILES}
-			"Source/Vulkan/VulkanSurface.cpp"
+			"Source/Vulkan/VulkanApiSurface.cpp"
 		)
 
-		message("[QuartzApp] Vulkan found: ${Vulkan_LIBRARY}")
-
 	else()
-		message("[QuartzApp] Vulkan not found. Skipping configuration.")
+		message("[QuartzApp] Vulkan not found. Skipping.")
 	endif()
 
 else()
-	message("[QuartzApp] Vulkan disabled. Skipping configuration.")
+	message("[QuartzApp] Vulkan disabled. Skipping.")
 endif()
 
 if(QUARTZAPP_ENABLE_DX12)
 
-	find_package(directx-headers QUIET)
+	#find_package(directx-headers QUIET)
 
 	if(${directx-headers_FOUND})
 
@@ -141,11 +190,11 @@ if(QUARTZAPP_ENABLE_DX12)
 		message("[QuartzApp] DX12 found: ${directx-headers_DIR}")
 
 	else()
-		message("[QuartzApp] DX12 not found. Skipping configuration.")
+		message("[QuartzApp] DX12 not found. Skipping.")
 	endif()
 
 else()
-	message("[QuartzApp] DX12 disabled. Skipping configuration.")
+	message("[QuartzApp] DX12 disabled. Skipping.")
 endif()
 
 if(NOT ${QUARTZ_SUPERBUILD})

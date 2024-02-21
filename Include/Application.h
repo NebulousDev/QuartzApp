@@ -19,7 +19,7 @@ namespace Quartz
 	typedef void(*KeyCallbackFunc)(Window* pWindow, uInt16 scancode, bool down, bool repeat);
 	typedef void(*KeyTypedCallbackFunc)(Window* pWindow, char character, bool repeat);
 	typedef void(*MouseMovedCallbackFunc)(Window* pWindow, uSize mouseX, uSize mouseY);
-	typedef void(*MouseMovedRelativeCallbackFunc)(Window* pWindow, uSize relX, uSize relY);
+	typedef void(*MouseMovedRelativeCallbackFunc)(Window* pWindow, sSize relX, sSize relY);
 	typedef void(*MouseEnteredCallbackFunc)(Window* pWindow, bool entered);
 
 
@@ -77,7 +77,7 @@ namespace Quartz
 
 		virtual bool IsRawInputAvailable() const = 0;
 		virtual bool IsRawInputEnabled() const = 0;
-		virtual bool UseRawInput(bool useRawInput) = 0;
+		virtual void UseRawInput(bool useRawInput) = 0;
 
 		void SetWindowResizedCallback(WindowResizedCallbackFunc callback);
 		void SetWindowMovedCallback(WindowMovedCallbackFunc callback);

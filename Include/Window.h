@@ -87,7 +87,7 @@ namespace Quartz
 		virtual bool IsInvisible() const = 0;
 		virtual bool SetInvisible(bool invisible) = 0;
 
-		virtual void* GetNativeHandle() = 0;
+		virtual void* GetNativeHandle() const = 0;
 
 		Application* GetParentApplication();
 		Surface* GetSurface();

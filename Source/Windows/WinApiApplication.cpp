@@ -135,24 +135,23 @@ namespace Quartz
 
 	bool WinApiApplication::IsRawInputAvailable() const
 	{
-		return false;
+		return true;
 	}
 
 	bool WinApiApplication::IsRawInputEnabled() const
 	{
-		return false;
+		return mUseRawInput;
 	}
 
-	bool WinApiApplication::UseRawInput(bool useRawInput)
+	void WinApiApplication::UseRawInput(bool useRawInput)
 	{
-		return false;
+		mUseRawInput = useRawInput;
 	}
 
 	void WinApiApplication::Update()
 	{
 		MSG msg = {};
 
-		/*
 		// Process and remove all messages before WM_INPUT
 		while (PeekMessageW(&msg, NULL, 0, WM_INPUT - 1, PM_REMOVE))
 		{
@@ -170,22 +169,12 @@ namespace Quartz
 		if (!mUseRawInput)
 		{
 			// We only want to process WndProc inputs when NOT using raw input 
-
-			// Process all WM_INPUT messages
 			while (PeekMessageW(&msg, NULL, WM_INPUT, WM_INPUT, PM_REMOVE))
 			{
 				TranslateMessage(&msg);
 				DispatchMessageW(&msg);
 			}
 		}
-		*/
-
-		while (PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE))
-		{
-			TranslateMessage(&msg);
-			DispatchMessageA(&msg);
-		}
-
 	}
 
 	void* WinApiApplication::GetNativeHandle()
@@ -288,7 +277,7 @@ namespace Quartz
 				WORD mouseX = LOWORD(lParam);
 				WORD mouseY = HIWORD(lParam);
 
-				Point2i pos = { (uSize)mouseX, (uSize)mouseY };
+				Point2i pos = { (sSize)mouseX, (sSize)mouseY };
 
 				if (!WinApiHelper::IsMouseInside(pWindow))
 				{

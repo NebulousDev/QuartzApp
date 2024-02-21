@@ -8,12 +8,12 @@
 #include "Log.h"
 
 #ifdef QUARTZAPP_GLEW
-#include "OpenGL/GLSurface.h"
+#include "OpenGL/GLApiSurface.h"
 #endif
 
 #ifdef QUARTZAPP_VULKAN
 #include <Vulkan/vulkan.h>
-#include "Vulkan/VulkanSurface.h"
+#include "Vulkan/VulkanApiSurface.h"
 #endif
 
 namespace Quartz
@@ -42,11 +42,11 @@ namespace Quartz
 			LogCallbackFunc logCallback);
 
 #ifdef QUARTZAPP_GLEW
-		static GLSurface* CreateWinApiGLSurface(LogCallbackFunc logCallback);
+		static GLApiSurface* CreateWinApiGLSurface(LogCallbackFunc logCallback);
 #endif
 
 #ifdef QUARTZAPP_VULKAN
-		static VulkanSurface* CreateWinApiVulkanSurface(HINSTANCE instance, HWND hwnd, 
+		static VulkanApiSurface* CreateWinApiVulkanSurface(HINSTANCE instance, HWND hwnd, 
 			const SurfaceInfo& info, LogCallbackFunc logCallback);
 #endif
 

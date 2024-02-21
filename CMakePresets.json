@@ -2,8 +2,6 @@
   "version": 3,
   "configurePresets": [
 
-    // Base:
-
     {
       "name": "base",
       "hidden": true,
@@ -11,8 +9,6 @@
       "binaryDir": "${sourceDir}/Build/${presetName}",
       "installDir": "${sourceDir}/Binary/${presetName}"
     },
-
-    // Vcpkg:
 
     {
       "name": "vcpkg",
@@ -25,7 +21,6 @@
       }
     },
 
-    // WSL Linux:
 
     {
       "name": "wsl-base",
@@ -79,7 +74,6 @@
       "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
     },
 
-    // Windows:
 
     {
       "name": "windows-base",

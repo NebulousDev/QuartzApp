@@ -4,7 +4,7 @@
 
 namespace Quartz
 {
-	class GLSurface : public Surface
+	class GLApiSurface : public Surface
 	{
 	public:
 		bool IsFullscreen() const override;

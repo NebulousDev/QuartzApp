@@ -327,7 +327,7 @@ namespace Quartz
 		return true;
 	}
 
-	void* GLFWWindow::GetNativeHandle()
+	void* GLFWWindow::GetNativeHandle() const
 	{
 		return mpGLFWwindow;
 	}

@@ -15,7 +15,7 @@ namespace Quartz
 			va_start(args, message);
 			int bufferSize = vsnprintf(nullptr, 0, message, args);
 
-			char* pBuffer = new char[bufferSize];
+			char* pBuffer = new char[bufferSize + 1]{};
 
 			va_start(args, message);
 			vsprintf(pBuffer, message, args);
@@ -23,6 +23,8 @@ namespace Quartz
 			callback(level, pBuffer);
 
 			va_end(args);
+
+			delete[] pBuffer;
 		}
 	}
 }

@@ -132,7 +132,6 @@ namespace Quartz
 		if (glfwRawMouseMotionSupported())
 		{
 			glfwSetInputMode(pGLFWwindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-			//glfwSetInputMode(pGLFWwindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		}
 
 		GLFWRegistry::RegisterAppWindow(this, pWindow);
@@ -177,9 +176,9 @@ namespace Quartz
 		return false;
 	}
 
-	bool GLFWApplication::UseRawInput(bool useRawInput)
+	void GLFWApplication::UseRawInput(bool useRawInput)
 	{
-		return false;
+		
 	}
 
 	void GLFWApplication::Update()

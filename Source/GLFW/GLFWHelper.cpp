@@ -55,12 +55,12 @@ namespace Quartz
 
 #ifdef QUARTZAPP_GLEW
 
-	GLSurface* GLFWHelper::CreateGLFWGLSurface(LogCallbackFunc logCallback)
+	GLApiSurface* GLFWHelper::CreateGLFWGLSurface(LogCallbackFunc logCallback)
 	{
-		return new GLSurface();
+		return new GLApiSurface();
 	}
 
-	void GLFWHelper::DestroyGLFWGLSurface(GLSurface* pSurface)
+	void GLFWHelper::DestroyGLFWGLSurface(GLApiSurface* pSurface)
 	{
 		delete pSurface;
 	}
@@ -69,13 +69,13 @@ namespace Quartz
 
 #ifdef QUARTZAPP_VULKAN
 
-	VulkanSurface* GLFWHelper::CreateGLFWVulkanSurface(GLFWwindow* pGLFWwindow, const SurfaceInfo& info, LogCallbackFunc logCallback)
+	VulkanApiSurface* GLFWHelper::CreateGLFWVulkanSurface(GLFWwindow* pGLFWwindow, const SurfaceInfo& info, LogCallbackFunc logCallback)
 	{
-		VulkanSurfaceInfo* pApiInfo = static_cast<VulkanSurfaceInfo*>(info.pApiInfo);
+		VulkanApiSurfaceInfo* pApiInfo = static_cast<VulkanApiSurfaceInfo*>(info.pApiInfo);
 
 		if (pApiInfo == nullptr)
 		{
-			AppLogCallback(logCallback, LOG_LEVEL_ERROR, "QuartzApp: Failed to create GLFW VulkanSurface: Invalid apiInfo.");
+			AppLogCallback(logCallback, LOG_LEVEL_ERROR, "QuartzApp: Failed to create GLFW VulkanApiSurface: Invalid apiInfo.");
 			return nullptr;
 		}
 
@@ -90,10 +90,10 @@ namespace Quartz
 
 		AppLogCallback(logCallback, LOG_LEVEL_INFO, "QuartzApp: GLFW Vulkan Surface created successfully.");
 
-		return new VulkanSurface(pApiInfo->instance, vkSurface);
+		return new VulkanApiSurface(pApiInfo->instance, vkSurface);
 	}
 
-	void GLFWHelper::DestroyGLFWVulkanSurface(VulkanSurface* pSurface)
+	void GLFWHelper::DestroyGLFWVulkanSurface(VulkanApiSurface* pSurface)
 	{
 		vkDestroySurfaceKHR(pSurface->GetVkInsance(), pSurface->GetVkSurface(), nullptr);
 		delete pSurface;
@@ -177,7 +177,7 @@ namespace Quartz
 	void GLFWHelper::CallMouseMovedRelativeCallback(GLFWApplication* pApplication, GLFWWindow* pWindow, double relX, double relY)
 	{
 		if (pApplication->mMouseMovedRelativeFunc)
-			pApplication->mMouseMovedRelativeFunc(pWindow, (uSize)relX, (uSize)relY);
+			pApplication->mMouseMovedRelativeFunc(pWindow, (sSize)relX, (sSize)relY);
 	}
 
 	void GLFWHelper::CallMouseEnteredCallback(GLFWApplication* pApplication, GLFWWindow* pWindow, int entered)
